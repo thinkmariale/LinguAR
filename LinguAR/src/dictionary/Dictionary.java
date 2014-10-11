@@ -4,16 +4,20 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class Dictionary {
 	
-	
+
 	private static List<HashMap<String, LookupVal>> dictionary;
 	
 	// initializer 
 	{
+
+		dictionary = new ArrayList<HashMap<String, LookupVal>>();
 		for(int i = 0; i < 26; i++){
 			dictionary.add(new HashMap<String,LookupVal>());
 		}
@@ -28,11 +32,13 @@ public class Dictionary {
 	
 	public void LoadDictionary(String filename){
 		
-		/*try(BufferedReader br = new BufferedReader(new FileReader(filename))) {
+		try(BufferedReader br = new BufferedReader(new FileReader(filename))) {
 		    for(String line; (line = br.readLine()) != null; ) {
+		    	String[] wordlist = (line.split(","));
+		    	
 		    	int c = getIndex(line);
 		    	
-		    	dictionary.get(c).put(line, new LookupVal(line));
+		    	dictionary.get(c).put(wordlist[0], new LookupVal(wordlist[0],wordlist[1]));
 		    	
 		    }
 		    
@@ -44,7 +50,7 @@ public class Dictionary {
 			e.printStackTrace();
 		}
 		
-		*/
+		
 	}
 	
 	public List<HashMap<String,LookupVal>> getDictionary(){
@@ -58,6 +64,7 @@ public class Dictionary {
 		return dictionary.get(c).get(w);
 		
 	}
+	
 	
 	public LookupVal addWord(String w, LookupVal l){
 				
@@ -100,4 +107,17 @@ public class Dictionary {
 		c -= 97;
 		return c;
 	}
+	
+	public static void main(String[] args) {
+	
+			Dictionary d = new Dictionary();
+			d.LoadDictionary("dictionarySpEn1.txt");
+			
+			System.out.println("loaded");
+			
+			System.out.println(d.find("steak"));
+		
+	}
+	
+	
 }

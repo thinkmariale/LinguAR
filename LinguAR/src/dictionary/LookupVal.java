@@ -36,4 +36,12 @@ public class LookupVal {
 		categoryList = new HashSet<String>(5);
 	}
 	
+	public String toString(){
+		
+		
+		return word + " : " + translation;
+		
+		
+	}
+	
 }
