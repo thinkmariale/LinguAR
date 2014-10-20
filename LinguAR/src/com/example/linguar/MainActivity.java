@@ -1,17 +1,57 @@
 package com.example.linguar;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+
+import dictionary.dictionary_populator;
 import android.app.Activity;
+import android.content.Intent;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 
 public class MainActivity extends Activity {
 
+	private dictionary_populator creator;
+	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        
+         try {
+    	   creator = new dictionary_populator();
+    	   AssetManager assetManager = getResources().getAssets();
+    	   InputStream inputStream = null;
+    	   inputStream = assetManager.open("categories.txt");
+    	   if ( inputStream != null) {
+    		   Log.d("READING_FILE", "loading file worked!");
+    		   creator.createCategoryDic(inputStream);
+    	   }
+    	   
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        
+     // Get the message from the intent
+      
+        String message = "hello";
+
+        // Create the text view
+        TextView textView = new TextView(this);
+        textView.setTextSize(40);
+        textView.setText(message);
+
+        // Set the text view as the activity layout
+        setContentView(textView);
+       // setContentView(R.layout.activity_main);
     }
 
 
