@@ -1,8 +1,5 @@
 package dictionary;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 public class LessonPlanStats {
 	
@@ -28,7 +25,8 @@ public class LessonPlanStats {
 		numIncorrect = 0;
 		percentCorrect = 0;
 		timesShown = 0;
-		lastShown = "";//(new SimpleDateFormat("yyyyMMddkkmmss",Locale.US)).format(new Date());
+
+		lastShown =  "";
 	}
 	
 	public LessonPlanStats(String w, int c, int i){

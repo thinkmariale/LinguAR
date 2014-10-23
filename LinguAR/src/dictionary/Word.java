@@ -1,9 +1,8 @@
 package dictionary;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
+
 
 public class Word {
 	public String word;
@@ -32,7 +31,9 @@ public class Word {
 		word = w;
 		translation = t;
 		stats = new LessonPlanStats(w,c,i);
-		passiveModeTimestamp = "";//(new SimpleDateFormat("yyyyMMddhhmmss",Locale.US)).format(new Date());
+
+		passiveModeTimestamp = "";
+	
 		categoryList = cats;		
 	}
 	
@@ -40,7 +41,8 @@ public class Word {
 		word = w;
 		translation = t;
 		stats = new LessonPlanStats(w);
-		passiveModeTimestamp = "";//(new SimpleDateFormat("yyyyMMddhhmmss",Locale.US)).format(new Date());
+
+		passiveModeTimestamp = ""; 
 		categoryList = new HashSet<Category>(5);
 	}
 	
@@ -49,4 +51,9 @@ public class Word {
 		return word + " : " + translation;
 	}
 	
+	
+	// Date Format that works
+//	Date date = new Date();
+//	DateFormat sdf =  new SimpleDateFormat("yyyyMMddkkmmss",Locale.US);
+//	sdf.format(date);
 }
