@@ -12,14 +12,14 @@ import java.util.List;
 public class Dictionary {
 	
 
-	private static List<HashMap<String, LookupVal>> dictionary;
+	private static List<HashMap<String, Word>> dictionary;
 	
 	// initializer 
 	{
 
-		dictionary = new ArrayList<HashMap<String, LookupVal>>();
+		dictionary = new ArrayList<HashMap<String, Word>>();
 		for(int i = 0; i < 26; i++){
-			dictionary.add(new HashMap<String,LookupVal>());
+			dictionary.add(new HashMap<String,Word>());
 		}
 		
 	}
@@ -38,7 +38,7 @@ public class Dictionary {
 		    	
 		    	int c = getIndex(line);
 		    	
-		    	dictionary.get(c).put(wordlist[0], new LookupVal(wordlist[0],wordlist[1]));
+		    	dictionary.get(c).put(wordlist[0], new Word(wordlist[0],wordlist[1]));
 		    	
 		    }
 		    
@@ -53,11 +53,11 @@ public class Dictionary {
 		
 	}
 	
-	public List<HashMap<String,LookupVal>> getDictionary(){
+	public List<HashMap<String,Word>> getDictionary(){
 		return dictionary;
 	}
 	
-	public LookupVal find(String w){
+	public Word find(String w){
 		
 		int c = getIndex(w);
 		
@@ -66,7 +66,7 @@ public class Dictionary {
 	}
 	
 	
-	public LookupVal addWord(String w, LookupVal l){
+	public Word addWord(String w, Word l){
 				
 		int c = getIndex(w);
 		
