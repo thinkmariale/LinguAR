@@ -9,14 +9,14 @@ public class Word {
 	public String translation;
 	public String passiveModeTimestamp;
 	public LessonPlanStats stats;
-	public HashSet<String> categoryList;
+	public HashSet<Category> categoryList;
 	
 	public Word(){
 		word = "";
 		translation = "";
 		stats = new LessonPlanStats();
 		passiveModeTimestamp = "";
-		categoryList = new HashSet<String>(5);
+		categoryList = new HashSet<Category>(5);
 	}
 	
 	public Word(String w){
@@ -24,10 +24,10 @@ public class Word {
 		translation = "";
 		stats = new LessonPlanStats();
 		passiveModeTimestamp = "";
-		categoryList = new HashSet<String>(5);
+		categoryList = new HashSet<Category>(5);
 	}
 	
-	public Word(String w, String t, int c, int i, HashSet<String> cats){
+	public Word(String w, String t, int c, int i, HashSet<Category> cats){
 		word = w;
 		translation = t;
 		stats = new LessonPlanStats(w,c,i);
@@ -40,7 +40,7 @@ public class Word {
 		translation = t;
 		stats = new LessonPlanStats(w);
 		passiveModeTimestamp = (new SimpleDateFormat("yyyyMMddkkmmss")).format(new Date());
-		categoryList = new HashSet<String>(5);
+		categoryList = new HashSet<Category>(5);
 	}
 	
 	public String toString(){

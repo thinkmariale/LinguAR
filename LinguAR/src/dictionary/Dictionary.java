@@ -4,23 +4,29 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
+import android.content.res.AssetManager;
+import android.util.Log;
+
 public class Dictionary {
 	
-
-	private static List<HashMap<String, Word>> dictionary;
+	private static Dictionary instance = new Dictionary( );
+	//private static List<HashMap<String, LookupVal>> dictionary;
+	private static HashMap<String, Word> dictionary;
 	
 	// initializer 
 	{
-
-		dictionary = new ArrayList<HashMap<String, Word>>();
+		//dictionary = new ArrayList<HashMap<String, LookupVal>>();
+		/*
 		for(int i = 0; i < 26; i++){
-			dictionary.add(new HashMap<String,Word>());
-		}
+			dictionary.add(new HashMap<String,LookupVal>());
+		}*/
 		
 	}
 	
@@ -28,39 +34,52 @@ public class Dictionary {
 		
 	}
 	
+	//get instance
+	/* Static 'instance' method */
+	 public static Dictionary getInstance( ) {
+	      return instance;
+	 }
+	   
 	// Format of english/spanish dictionary??
-	
-	public void LoadDictionary(String filename){
+	public void LoadDictionary(InputStream inputStream) throws IOException{
 		
-		try(BufferedReader br = new BufferedReader(new FileReader(filename))) {
-		    for(String line; (line = br.readLine()) != null; ) {
-		    	String[] wordlist = (line.split(","));
-		    	
-		    	int c = getIndex(line);
-		    	
-		    	dictionary.get(c).put(wordlist[0], new Word(wordlist[0],wordlist[1]));
-		    	
-		    }
-		    
-		} catch (FileNotFoundException e) {
-			System.out.println("error finding file");
-			e.printStackTrace();
-		} catch (IOException e) {
-			System.out.println("error during file IO");
-			e.printStackTrace();
+		dictionary = new HashMap<String, Word>();
+		InputStreamReader is = new InputStreamReader(inputStream);
+		BufferedReader br = new BufferedReader(is);
+		
+		 Log.d("DIC", "in dic!");
+		
+		 String read          = br.readLine();
+		 StringBuilder sb     = new StringBuilder();
+		 while(read != null) {
+			 sb.append(read);
+			 String[] wordlist = (read.split(","));
+			 dictionary.put(wordlist[0], new Word(wordlist[0],wordlist[1]) );
+			 read = br.readLine();
+
 		}
 		
 		
 	}
 	
-	public List<HashMap<String,Word>> getDictionary(){
+
+	//public List<HashMap<String,LookupVal>> getDictionary(){
+		//return dictionary;
+	//}
+	public HashMap<String,Word> getDictionary(){
 		return dictionary;
+	} 
+	
+	public void setCategory(String word, Category cat)
+	{
+		dictionary.get(word).categoryList.add(cat);
 	}
 	
-	public Word find(String w){
+	//public Word find(String w){}
+
+	/*public LookupVal find(String w){
 		
 		int c = getIndex(w);
-		
 		return dictionary.get(c).get(w);
 		
 	}
@@ -72,7 +91,7 @@ public class Dictionary {
 		
 		return dictionary.get(c).put(w, l);
 				
-	}
+	}*/
 	
 	public boolean updateWordTranslation(){
 		boolean result = false;
@@ -81,7 +100,7 @@ public class Dictionary {
 	}
 	
 	
-	public int fullUpdate(Dictionary d){
+	/*public int fullUpdate(Dictionary d){
 		int numAdded = 0;
 		
 		for (int i = 0; i <26; i++){
@@ -96,7 +115,7 @@ public class Dictionary {
 		
 		
 		return numAdded;
-	}
+	}*/
 	
 	public int getIndex(String w){
 		char c = w.charAt(0);
@@ -106,17 +125,6 @@ public class Dictionary {
 		}
 		c -= 97;
 		return c;
-	}
-	
-	public static void main(String[] args) {
-	
-			Dictionary d = new Dictionary();
-			d.LoadDictionary("dictionarySpEn1.txt");
-			
-			System.out.println("loaded");
-			
-			System.out.println(d.find("steak"));
-		
 	}
 	
 	
