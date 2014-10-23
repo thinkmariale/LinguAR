@@ -3,6 +3,7 @@ package dictionary;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Locale;
 
 public class Word {
 	public String word;
@@ -31,7 +32,7 @@ public class Word {
 		word = w;
 		translation = t;
 		stats = new LessonPlanStats(w,c,i);
-		passiveModeTimestamp = (new SimpleDateFormat("yyyyMMddkkmmss")).format(new Date());
+		passiveModeTimestamp = "";//(new SimpleDateFormat("yyyyMMddhhmmss",Locale.US)).format(new Date());
 		categoryList = cats;		
 	}
 	
@@ -39,16 +40,13 @@ public class Word {
 		word = w;
 		translation = t;
 		stats = new LessonPlanStats(w);
-		passiveModeTimestamp = (new SimpleDateFormat("yyyyMMddkkmmss")).format(new Date());
+		passiveModeTimestamp = "";//(new SimpleDateFormat("yyyyMMddhhmmss",Locale.US)).format(new Date());
 		categoryList = new HashSet<Category>(5);
 	}
 	
 	public String toString(){
 		
-		
 		return word + " : " + translation;
-		
-		
 	}
 	
 }

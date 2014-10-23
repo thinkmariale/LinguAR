@@ -26,6 +26,12 @@ public class CategoryDictionary {
 	//Function will increase count to category
 	public void increaseCount(Category cat)
 	{
+		
+	}
+	//Function returns list of words in THAT category
+	public List<String> getWordsFromCategory(Category cat)
+	{
+		return category_dictionary.get(cat);
 	}
 	
 	// Function that returns top 5 categories

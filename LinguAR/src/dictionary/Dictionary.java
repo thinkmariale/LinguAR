@@ -1,17 +1,12 @@
 package dictionary;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 
-import android.content.res.AssetManager;
 import android.util.Log;
 
 public class Dictionary {
@@ -50,16 +45,13 @@ public class Dictionary {
 		 Log.d("DIC", "in dic!");
 		
 		 String read          = br.readLine();
-		 StringBuilder sb     = new StringBuilder();
 		 while(read != null) {
-			 sb.append(read);
 			 String[] wordlist = (read.split(","));
 			 dictionary.put(wordlist[0], new Word(wordlist[0],wordlist[1]) );
 			 read = br.readLine();
-
 		}
-		
-		
+		 	
+		 Log.d("DIC","dic length " + String.valueOf( dictionary.size() ));
 	}
 	
 
