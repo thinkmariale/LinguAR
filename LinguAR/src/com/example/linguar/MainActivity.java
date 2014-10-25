@@ -5,6 +5,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 
+import dictionary.Dictionary;
 import dictionary.dictionary_populator;
 import android.app.Activity;
 import android.content.Intent;
@@ -30,10 +31,19 @@ public class MainActivity extends Activity {
     	   AssetManager assetManager = getResources().getAssets();
     	   InputStream inputStream = null;
     	   inputStream = assetManager.open("categories.txt");
-    	   if ( inputStream != null) {
-    		   Log.d("READING_FILE", "loading file worked!");
-    		   creator.createCategoryDic(inputStream);
-    	   }
+       	   InputStream inputStream1 = null;
+       	   inputStream1 = assetManager.open("dictionarySpEn1.txt");
+       	   
+	       	if ( inputStream1 != null) {
+	 		   Log.d("READING_FILE", "loading file Dic  worked!");
+	 			Dictionary dic = Dictionary.getInstance();
+	 			dic.LoadDictionary(inputStream1);
+	 	    }
+	       	
+	       	if ( inputStream != null) {
+	       		Log.d("READING_FILE", "loading file Cat worked!");
+	    		creator.createCategoryDic(inputStream);
+	    	}
     	   
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
