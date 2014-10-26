@@ -1,8 +1,6 @@
 package com.example.linguar;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
+
 import java.io.InputStream;
 import java.util.List;
 
@@ -12,8 +10,7 @@ import dictionary.Dictionary;
 import dictionary.Word;
 import dictionary.dictionary_populator;
 import android.app.Activity;
-import android.content.Intent;
-import android.content.res.AssetFileDescriptor;
+
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -50,7 +47,7 @@ public class MainActivity extends Activity {
 	    		creator.createCategoryDic(inputStream);
 	    	}
     	   
-		} catch (IOException e) {
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
