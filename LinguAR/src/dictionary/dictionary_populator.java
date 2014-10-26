@@ -19,11 +19,7 @@ public class dictionary_populator {
 	/* class will populate the category dictionary */
 	private static HashMap<Category, List<String> > category_dictionary;
 	
-	// initializer 
-	{
-		category_dictionary = new HashMap<Category, List<String> > ();	
-	}
-	
+
 	public void createCategoryDic(InputStream file) throws Exception
 	{
 		System.out.println("creating category directionary");
@@ -44,6 +40,7 @@ public class dictionary_populator {
 		try {
 			JSONObject reader = new JSONObject(sb.toString() );
 			JSONArray a = reader.names();
+			category_dictionary = new HashMap<Category, List<String> > ();	
 			
 			for(int i = 0; i < a.length(); i++) {
 				JSONArray a1 = reader.getJSONArray(a.getString(i));
