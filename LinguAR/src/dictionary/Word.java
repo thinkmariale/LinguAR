@@ -1,45 +1,52 @@
 package dictionary;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 
 
 public class Word {
-	public String word;
-	public String translation;
+	public String englishWord;
+	public String spanishTranslation;
 	public String passiveModeTimestamp;
 	public LessonPlanStats stats;
 	public HashSet<Category> categoryList;
 	
+	// Date Format that works
+	private Date date = new Date();
+	private DateFormat sdf =  new SimpleDateFormat("yyyyMMddkkmmss",Locale.US);
+
 	public Word(){
-		word = "";
-		translation = "";
+		englishWord = "";
+		spanishTranslation = "";
 		stats = new LessonPlanStats();
 		passiveModeTimestamp = "";
 		categoryList = new HashSet<Category>(5);
 	}
 	
 	public Word(String w){
-		word = w;
-		translation = "";
+		englishWord = w;
+		spanishTranslation = "";
 		stats = new LessonPlanStats();
 		passiveModeTimestamp = "";
 		categoryList = new HashSet<Category>(5);
 	}
 	
 	public Word(String w, String t, int c, int i, HashSet<Category> cats){
-		word = w;
-		translation = t;
+		englishWord = w;
+		spanishTranslation = t;
 		stats = new LessonPlanStats(w,c,i);
 
-		passiveModeTimestamp = "";
+		passiveModeTimestamp = sdf.format(date);
 	
 		categoryList = cats;		
 	}
 	
 	public Word(String w, String t){
-		word = w;
-		translation = t;
+		englishWord = w;
+		spanishTranslation = t;
 		stats = new LessonPlanStats(w);
 
 		passiveModeTimestamp = ""; 
@@ -48,12 +55,7 @@ public class Word {
 	
 	public String toString(){
 		
-		return word + " : " + translation;
+		return englishWord + " : " + spanishTranslation;
 	}
 	
-	
-	// Date Format that works
-//	Date date = new Date();
-//	DateFormat sdf =  new SimpleDateFormat("yyyyMMddkkmmss",Locale.US);
-//	sdf.format(date);
 }

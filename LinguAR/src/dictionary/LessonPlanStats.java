@@ -1,5 +1,10 @@
 package dictionary;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 
 public class LessonPlanStats {
 	
@@ -9,6 +14,10 @@ public class LessonPlanStats {
 	public double percentCorrect;
 	public int timesShown; // This is for the active mode where the system would be showing the word to the user a few number of times
 	public String lastShown;
+	
+	// Date Format that works
+	private Date date = new Date();
+	private DateFormat sdf =  new SimpleDateFormat("yyyyMMddkkmmss",Locale.US);
 	
 	public LessonPlanStats(){
 		word = "";

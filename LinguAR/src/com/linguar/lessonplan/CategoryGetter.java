@@ -20,8 +20,9 @@ public class CategoryGetter {
 	/**
 	 * This method is used to return the top 5 categories from either the saved list, or the list of default categories, or a mix of both
 	 * @return 
+	 * @throws Exception If the list of categories requested is  more than the default number of categories available, an exception is thrown
 	 */
-	public List<Category> getTopFiveCategories(){
+	public List<Category> getTopFiveCategories() throws Exception{
 		topCategories =_catDictionary.getTopCategories();
 
 		if(topCategories == null)
@@ -69,15 +70,15 @@ public class CategoryGetter {
 	 * This method is used to get a required number of default categories
 	 * @param n = number of required default categories
 	 * @return
+	 * @throws Exception In case the number of reqested categories is less than the available list of default categories, an exception is thrown
 	 */
-	private List<Category> getDefaultCategories(int n)
+	private List<Category> getDefaultCategories(int n) throws Exception
 	{
 		defaultCategories = _default.getAllDefaultCategories();
 		
 		if(defaultCategories.size()<n)
 		{
-			System.out.println("Number of requested categories are less than the number of default catagories available");
-			return null;
+			throw new Exception("Number of requested categories are more than the number of default catagories available");
 		}
 		
 		List<Category> reducedList = new ArrayList<Category>(n);
