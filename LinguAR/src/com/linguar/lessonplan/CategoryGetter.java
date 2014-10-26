@@ -16,8 +16,8 @@ public class CategoryGetter {
 
 	private CategoryDictionary _catDictionary;
 	private DefaultCategories _default;
-	private List<Category> defaultCategories;
-	private List<Category> topCategories;
+	private List<Category> defaultCategories =  new ArrayList<Category>();
+	private List<Category> topCategories = new ArrayList<Category>();
 
 	/**
 	 * This method is used to return the top 5 categories from either the saved list, or the list of default categories, or a mix of both
@@ -25,8 +25,9 @@ public class CategoryGetter {
 	 * @throws Exception If the list of categories requested is  more than the default number of categories available, an exception is thrown
 	 */
 	public List<Category> getTopFiveCategories() throws Exception{
+		_catDictionary= CategoryDictionary.getInstance();
 		topCategories =_catDictionary.getTopCategories();
-
+		System.out.println("Top Categories : "+ topCategories.get(0));
 		if(topCategories == null)
 		{
 			//Load top 5 categories with the default categories
@@ -76,8 +77,9 @@ public class CategoryGetter {
 	 */
 	private List<Category> getDefaultCategories(int n) throws Exception
 	{
+		_default = new DefaultCategories();
 		defaultCategories = _default.getAllDefaultCategories();
-		
+		System.out.println("Default Category 1: "+defaultCategories.get(0));
 		//Shuffle the default categories to ensure they are random
 		Collections.shuffle(defaultCategories);
 		

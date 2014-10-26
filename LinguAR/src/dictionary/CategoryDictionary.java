@@ -33,24 +33,29 @@ public class CategoryDictionary {
 	//Function returns list of words in THAT category
 	public List<String> getWordsFromCategory(Category cat)
 	{
-		if(category_dictionary.containsKey(cat))
+		if(category_dictionary.containsKey(cat)){
 			return category_dictionary.get(cat);
+		}		
 		return null;
 	}
 	
 	// Function that returns top 5 categories
 	public List<Category> getTopCategories()
 	{
-		List<Category> top = new ArrayList<Category>() 
+		List<Category> top = new ArrayList<Category>()
 				{{ add(new Category()); add(new Category()); add(new Category()); 
 				add(new Category()); add(new Category()); }} ;
 				
 		for (Category key : category_dictionary.keySet()) {
 			int c = 0;
+			
 			while(c < top.size() )
 			{
 				if(key.counter > top.get(c).counter){
-					top.get(c).set( key);
+					//getWordsFromCategory(key);
+					top.remove(c);
+					top.add(c,key);
+					//getWordsFromCategory(top.get(c));
 					break;
 				}
 				else c++;

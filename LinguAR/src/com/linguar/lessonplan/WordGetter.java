@@ -11,7 +11,7 @@ import dictionary.Word;
 public class WordGetter{
 	
 
-	private CategoryDictionary _cDictionary =  new CategoryDictionary();
+	private CategoryDictionary _cDictionary;	
 	
 	/**
 	 * Returns the list of all words from the list of Categories. The list is shuffled
@@ -21,6 +21,7 @@ public class WordGetter{
 	 */
 	public List<String> getWordsFromCategoryList(List<Category> categoryList) throws Exception
 	{
+		 _cDictionary =  CategoryDictionary.getInstance();
 		List<String> allCategoryWords =  new ArrayList<String>();
 		
 		if(categoryList.size() < 5)
@@ -30,7 +31,9 @@ public class WordGetter{
 		
 		//Get all the words from the supplied list of categories
 		for (Category category : categoryList) {
+			System.out.println("Category : "+ category.category);
 			 allCategoryWords = _cDictionary.getWordsFromCategory(category);
+			 System.out.println("Number of words in the category increased the size to : "+ allCategoryWords);
 		}
 		
 		//Shuffle the obtained list of words

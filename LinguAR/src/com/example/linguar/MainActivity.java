@@ -4,6 +4,8 @@ package com.example.linguar;
 import java.io.InputStream;
 import java.util.List;
 
+import com.linguar.lessonplan.ReviewMode;
+
 import dictionary.Category;
 import dictionary.CategoryDictionary;
 import dictionary.Dictionary;
@@ -73,6 +75,14 @@ public class MainActivity extends Activity {
     	   }
 
        }
+       
+       ReviewMode rm = new ReviewMode();
+       try {
+		rm.startLessonPlan();
+	} catch (Exception e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+	}
        
         String message = "hello";
 
