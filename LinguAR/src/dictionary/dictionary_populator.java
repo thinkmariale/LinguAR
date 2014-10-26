@@ -13,6 +13,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.linguar.lessonplan.ReviewMode;
+
 public class dictionary_populator {
 
 	/* class will populate the category dictionary */
@@ -23,7 +25,7 @@ public class dictionary_populator {
 		category_dictionary = new HashMap<Category, List<String> > ();	
 	}
 	
-	public void createCategoryDic(InputStream file) throws IOException
+	public void createCategoryDic(InputStream file) throws Exception
 	{
 		System.out.println("creating category directionary");
 		InputStreamReader is = new InputStreamReader(file);
@@ -71,5 +73,8 @@ public class dictionary_populator {
 		CategoryDictionary cat = CategoryDictionary.getInstance();
 		cat.setCategoryDic(category_dictionary);
 
+		//Displaying the words
+		ReviewMode rm = new ReviewMode();
+		rm.startLessonPlan();
 	}
 }

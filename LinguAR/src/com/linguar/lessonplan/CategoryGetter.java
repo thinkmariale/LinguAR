@@ -1,7 +1,9 @@
 package com.linguar.lessonplan;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import dictionary.Category;
 import dictionary.CategoryDictionary;
@@ -76,6 +78,9 @@ public class CategoryGetter {
 	{
 		defaultCategories = _default.getAllDefaultCategories();
 		
+		//Shuffle the default categories to ensure they are random
+		Collections.shuffle(defaultCategories);
+		
 		if(defaultCategories.size()<n)
 		{
 			throw new Exception("Number of requested categories are more than the number of default catagories available");
@@ -88,5 +93,34 @@ public class CategoryGetter {
 		}
 
 		return reducedList;
+	}
+	
+	
+	//TODO-------------------------------The Exact logic and implementation of this method is still undecided------------------------------------
+	
+	/**
+	 * This method is used to swap out a different default category for the one that the method is supplied with
+	 * @param category The default category that needs to be replaced with a new one
+	 * @return The new default category
+	 * @throws Exception If the default number categories is equal to one (insufficent to swap out a new category), an exception would be thrown 
+	 */
+	public Category getNewCategory(Category category) throws Exception
+	{
+		if(defaultCategories==null)
+		defaultCategories = _default.getAllDefaultCategories();
+		
+		if(defaultCategories.size()==1)
+		{
+			throw new Exception("Can't swap out new category because there is only one default category available");
+		}
+		Category cat = new Category();
+		Random rand = new Random();
+		//Return a new category
+		while(cat!=category)
+		{
+		cat = defaultCategories.get(rand.nextInt(defaultCategories.size()));
+		}
+		
+		return cat;
 	}
 }

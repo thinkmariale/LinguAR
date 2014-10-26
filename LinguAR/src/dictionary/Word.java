@@ -2,6 +2,7 @@ package dictionary;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
@@ -15,7 +16,7 @@ public class Word {
 	public HashSet<Category> categoryList;
 	
 	// Date Format that works
-	private Date date = new Date();
+	//private Date date = new Date();
 	private DateFormat sdf =  new SimpleDateFormat("yyyyMMddkkmmss",Locale.US);
 
 	public Word(){
@@ -39,7 +40,7 @@ public class Word {
 		spanishTranslation = t;
 		stats = new LessonPlanStats(w,c,i);
 
-		passiveModeTimestamp = sdf.format(date);
+		passiveModeTimestamp = sdf.format(Calendar.getInstance().getTime());
 	
 		categoryList = cats;		
 	}
