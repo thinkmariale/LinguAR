@@ -4,8 +4,12 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
+import dictionary.Category;
+import dictionary.CategoryDictionary;
 import dictionary.Dictionary;
+import dictionary.Word;
 import dictionary.dictionary_populator;
 import android.app.Activity;
 import android.content.Intent;
@@ -25,19 +29,20 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
-         try {
+        Dictionary dic = Dictionary.getInstance();
+       
+        try {
     	   creator = new dictionary_populator();
     	   AssetManager assetManager = getResources().getAssets();
     	   InputStream inputStream = null;
     	   inputStream = assetManager.open("categories.txt");
        	   InputStream inputStream1 = null;
        	   inputStream1 = assetManager.open("dictionarySpEn1.txt");
-       	   
+       	
 	       	if ( inputStream1 != null) {
 	 		   Log.d("READING_FILE", "loading file Dic  worked!");
-	 			Dictionary dic = Dictionary.getInstance();
-	 			dic.LoadDictionary(inputStream1);
+	 		  
+	 		   dic.LoadDictionary(inputStream1);
 	 	    }
 	       	
 	       	if ( inputStream != null) {
@@ -52,6 +57,26 @@ public class MainActivity extends Activity {
         
      // Get the message from the intent
       
+        String []test = {"apple", "banana","peach","car","bike"};
+        
+        for(String str: test)
+        {
+        	Word x = dic.getWord(str, true);
+        	Log.d("DIC","word " + x.englishWord + " " +  x.spanishTranslation);
+        }
+        
+        CategoryDictionary cat = CategoryDictionary.getInstance();
+       List<Category> listCat = cat.getTopCategories();
+       Log.d("DIC", "Size list " + listCat.size());
+       for(Category c: listCat)
+       {
+    	   if(c != null)
+    	   {
+    		   Log.d("DIC", "Count " + c.counter  + " " + c.category);
+    	   }
+
+       }
+       
         String message = "hello";
 
         // Create the text view
