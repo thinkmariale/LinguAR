@@ -55,9 +55,6 @@ public class Dictionary {
 	}
 	
 
-	//public List<HashMap<String,LookupVal>> getDictionary(){
-		//return dictionary;
-	//}
 	public HashMap<String,Word> getDictionary(){
 		return dictionary;
 	} 
@@ -67,7 +64,19 @@ public class Dictionary {
 		dictionary.get(word).categoryList.add(cat);
 	}
 	
-	//public Word find(String w){}
+	//Function to get word and if its being shown, increment category count
+	public Word getWord(String w, boolean isDisplayed)
+	{
+		if(dictionary.containsKey(w))
+		{
+			if(isDisplayed) {
+				dictionary.get(w).incrementCategoryCount();
+			}
+			return dictionary.get(w);
+		}
+		
+		return null;
+	}
 
 	/*public LookupVal find(String w){
 		

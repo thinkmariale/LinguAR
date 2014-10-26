@@ -17,7 +17,7 @@ public class LessonPlanStats {
 	
 	// Date Format that works
 	private Date date = new Date();
-	private DateFormat sdf =  new SimpleDateFormat("yyyyMMddkkmmss",Locale.US);
+	//private DateFormat sdf =  new SimpleDateFormat("yyyyMMddkkmmss",Locale.US);
 	
 	public LessonPlanStats(){
 		word = "";

@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Locale;
 
+import android.util.Log;
+
 
 public class Word {
 	public String englishWord;
@@ -16,7 +18,7 @@ public class Word {
 	
 	// Date Format that works
 	private Date date = new Date();
-	private DateFormat sdf =  new SimpleDateFormat("yyyyMMddkkmmss",Locale.US);
+	//private DateFormat sdf = new SimpleDateFormat("yyyyMMddkkmmss",Locale.US);
 
 	public Word(){
 		englishWord = "";
@@ -39,7 +41,7 @@ public class Word {
 		spanishTranslation = t;
 		stats = new LessonPlanStats(w,c,i);
 
-		passiveModeTimestamp = sdf.format(date);
+		passiveModeTimestamp = "";//sdf.format(date);
 	
 		categoryList = cats;		
 	}
@@ -56,6 +58,15 @@ public class Word {
 	public String toString(){
 		
 		return englishWord + " : " + spanishTranslation;
+	}
+	
+	//function to increment count in categories depending the word said
+	public void incrementCategoryCount()
+	{
+		for(Category cat:categoryList)
+		{
+			cat.counter = cat.counter + 1;
+		}
 	}
 	
 }

@@ -52,7 +52,7 @@ public class dictionary_populator {
 				List<String> words = new ArrayList<String> ();
 				for(int j = 0; j < a1.length(); j++) {
 					//System.out.println(a1.getString(j));
-					//dic.setCategory(a1.getString(j), cat);
+					dic.setCategory(a1.getString(j), cat);
 					words.add(a1.getString(j));
 				}
 				
