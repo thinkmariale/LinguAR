@@ -11,6 +11,7 @@ import dictionary.Word;
 public class WordGetter{
 	
 
+	public final int MAX_WORDS_IN_24_HOURS = 7;
 	private CategoryDictionary _cDictionary;	
 	
 	/**
@@ -35,11 +36,26 @@ public class WordGetter{
 			 allCategoryWords.addAll(_cDictionary.getWordsFromCategory(category));
 		}
 		
+		//If the total number of words in a category are less than twice the number of words to be shown in 24 hours get more categories
+		while(allCategoryWords.size() < MAX_WORDS_IN_24_HOURS*2)
+		{
+			CategoryGetter _cGetter = new CategoryGetter();
+			Category newCategory =_cGetter.getNewCategory(categoryList);
+			categoryList.add(newCategory);
+			allCategoryWords.addAll(_cDictionary.getWordsFromCategory(newCategory));
+		}
+		
 		//Shuffle the obtained list of words
 		Collections.shuffle(allCategoryWords);
-		 System.out.println("Words in these categories are : "+ allCategoryWords);
+		
+		List<String> _14Words = new ArrayList<String>();
+		for(int i=0; i<14; i++)
+		{
+		_14Words.add(allCategoryWords.get(i));
+		}
+		 System.out.println("Words in these categories are : "+ _14Words);
 
-		return allCategoryWords;
+		return _14Words;
 	}
 
 }

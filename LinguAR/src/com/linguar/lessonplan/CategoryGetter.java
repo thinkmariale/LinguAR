@@ -97,28 +97,43 @@ public class CategoryGetter {
 		return reducedList;
 	}
 	
-	
-	//TODO-------------------------------The Exact logic and implementation of this method is still undecided------------------------------------
-	
+		
 	/**
-	 * This method is used to swap out a different default category for the one that the method is supplied with
-	 * @param category The default category that needs to be replaced with a new one
-	 * @return The new default category
-	 * @throws Exception If the default number categories is equal to one (insufficent to swap out a new category), an exception would be thrown 
+	 * This method is used to get a new default category that doesn't exist in the list of categories that the method is supplied with
+	 * @param categories The category list that needs more categories to be added
+	 * @return The new category
+	 * @throws Exception If there are no new categories left from the list of default categories or if the default category list is null, the system would find 
 	 */
-	public Category getNewCategory(Category category) throws Exception
+	public Category getNewCategory(List<Category> categories) throws Exception
 	{
 		if(defaultCategories==null)
 		defaultCategories = _default.getAllDefaultCategories();
 		
-		if(defaultCategories.size()==1)
+		if(defaultCategories == null)
 		{
-			throw new Exception("Can't swap out new category because there is only one default category available");
+			throw new Exception("The default category list is null");
+		}
+		
+		int count = 0;
+		//Check if there are any more categories that can be loaded into the list to keep the lesson plan running, if not throw an exception
+		for (Category defaultCategory : defaultCategories) {
+			if(!categories.contains(defaultCategory))
+				break;
+			else
+				count++;
+		}
+		
+		if(count==defaultCategories.size())
+		{
+			AlertMessage alert =  new AlertMessage();
+			alert.showAlertMessage("You’ve gone through all the default categories of words. This is a contextual vocabulary learning app. Please use the passive mode for a while, to help the app learn more about your vocabulary. You may return back after you’ve done so");
+			
+			//TODO: Set states as end of mode as soon s this is encountered------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		}
 		Category cat = new Category();
 		Random rand = new Random();
 		//Return a new category
-		while(cat!=category)
+		while(!categories.contains(cat))
 		{
 		cat = defaultCategories.get(rand.nextInt(defaultCategories.size()));
 		}
