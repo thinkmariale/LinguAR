@@ -20,11 +20,8 @@ public class Word {
 	// Date Format that works
 
 	//private Date date = new Date();
-<<<<<<< Updated upstream
-	//private DateFormat sdf =  new SimpleDateFormat("yyyyMMddkkmmss",Locale.US);
-=======
+
 //	private DateFormat sdf =  new SimpleDateFormat("yyyyMMddkkmmss",Locale.US);
->>>>>>> Stashed changes
 
 
 	public Word(){
@@ -48,11 +45,8 @@ public class Word {
 		spanishTranslation = t;
 		stats = new LessonPlanStats(w,c,i);
 
-<<<<<<< Updated upstream
-		passiveModeTimestamp = "";// sdf.format(Calendar.getInstance().getTime());
-=======
+
 		passiveModeTimestamp = "";//sdf.format(Calendar.getInstance().getTime());
->>>>>>> Stashed changes
 		categoryList = cats;		
 	}
 	

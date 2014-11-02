@@ -15,7 +15,7 @@ public class Serialization {
 	      {
 			 // Dictionary
 	         FileOutputStream fileOut =
-	         new FileOutputStream("/tmp/dictionary.ser");
+	         new FileOutputStream("dictionary.ser");
 	         ObjectOutputStream out = new ObjectOutputStream(fileOut);
 	         out.writeObject(dir);
 	         out.close();
@@ -24,7 +24,7 @@ public class Serialization {
 	         
 	         // Category dictionary
 	         FileOutputStream fileOut1 =
-	         new FileOutputStream("/tmp/cat_dictionary.ser");
+	         new FileOutputStream("cat_dictionary.ser");
 	         ObjectOutputStream out1 = new ObjectOutputStream(fileOut1);
 	         out1.writeObject(cat);
 	         out1.close();
@@ -44,13 +44,13 @@ public class Serialization {
 		// Load Dictionary/CategoryDictionary from file
 		try
 	      {
-	         FileInputStream fileIn = new FileInputStream("/tmp/dictionary.ser");
+	         FileInputStream fileIn = new FileInputStream("dictionary.ser");
 	         ObjectInputStream in = new ObjectInputStream(fileIn);
 	         dir = (Dictionary) in.readObject();
 	         in.close();
 	         fileIn.close();
 	         // now load CategoryDictionary
-	         FileInputStream fileIn1 = new FileInputStream("/tmp/cat_dictionary.ser");
+	         FileInputStream fileIn1 = new FileInputStream("cat_dictionary.ser");
 	         ObjectInputStream in1 = new ObjectInputStream(fileIn);
 	         cat = (CategoryDictionary) in1.readObject();
 	         in1.close();

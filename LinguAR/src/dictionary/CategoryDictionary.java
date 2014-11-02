@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import android.util.Log;
 
 public class CategoryDictionary {
 	
 	private static CategoryDictionary instance = new CategoryDictionary();
 	
 	private static HashMap<Category, List<String> > category_dictionary;
-	private int topCat = 5;
 	
+	// initializer 
+		{
+			category_dictionary = new HashMap<Category, List<String> >();
+			
+		}
 	//get instance
 	/* Static 'instance' method */
 	public static CategoryDictionary getInstance( ) {
