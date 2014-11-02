@@ -21,9 +21,7 @@ public class Word {
 
 	//private Date date = new Date();
 
-	//private DateFormat sdf =  new SimpleDateFormat("yyyyMMddkkmmss",Locale.US);
-
-
+//	private DateFormat sdf =  new SimpleDateFormat("yyyyMMddkkmmss",Locale.US);
 
 
 	public Word(){
@@ -46,6 +44,7 @@ public class Word {
 		englishWord = w;
 		spanishTranslation = t;
 		stats = new LessonPlanStats(w,c,i);
+
 
 		passiveModeTimestamp = "";//sdf.format(Calendar.getInstance().getTime());
 		categoryList = cats;		

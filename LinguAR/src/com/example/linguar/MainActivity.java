@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.util.List;
 
 import com.linguar.lessonplan.ReviewMode;
+import com.linguar.serialization.Serialization;
 
 import dictionary.Category;
 import dictionary.CategoryDictionary;
@@ -32,29 +33,39 @@ public class MainActivity extends Activity {
         Dictionary dic = Dictionary.getInstance();
        
         try {
-    	   creator = new dictionary_populator();
-    	   AssetManager assetManager = getResources().getAssets();
-    	   InputStream inputStream = null;
-    	   inputStream = assetManager.open("categories.txt");
-       	   InputStream inputStream1 = null;
-       	   inputStream1 = assetManager.open("dictionarySpEn1.txt");
-       	
-	       	if ( inputStream1 != null) {
-	 		   Log.d("READING_FILE", "loading file Dic  worked!");
-	 		  
-	 		   dic.LoadDictionary(inputStream1);
-	 	    }
-	       	
-	       	if ( inputStream != null) {
-	       		Log.d("READING_FILE", "loading file Cat worked!");
-	    		creator.createCategoryDic(inputStream);
-	    	}
+        	Serialization s = new Serialization();
+        	s.loadData();
+        	
+        	if(dic.getDictionary().isEmpty()){
+        		Log.d("READING_FILE", "empty!");
+        		creator = new dictionary_populator();
+        		AssetManager assetManager = getResources().getAssets();
+        		InputStream inputStream = null;
+        		inputStream = assetManager.open("finalCategories.txt");
+        		InputStream inputStream1 = null;
+        		inputStream1 = assetManager.open("dictionarySpEn1.txt");
+
+        		if ( inputStream1 != null) {
+        			Log.d("READING_FILE", "loading file Dic  worked!");
+        			dic.LoadDictionary(inputStream1);
+        		}
+
+        		if ( inputStream != null) {
+        			Log.d("READING_FILE", "loading file Cat worked!");
+        			creator.createCategoryDic(inputStream);
+        		}
+        		
+        		s.saveData();
+        	}
+        	else
+        		Log.d("READING_FILE", "not empty!");
+        		
     	   
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        
+        /*
      // Get the message from the intent
       
         String []test = {"apple", "banana","peach","car","bike"};
@@ -84,7 +95,7 @@ public class MainActivity extends Activity {
 		// TODO Auto-generated catch block
 		e.printStackTrace();
 	}
-       
+       */
         String message = "hello";
 
        // Create the text view

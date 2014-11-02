@@ -17,7 +17,7 @@ public class Dictionary {
 	
 	// initializer 
 	{
-		//dictionary = new ArrayList<HashMap<String, LookupVal>>();
+		dictionary = new HashMap<String, Word>();
 		/*
 		for(int i = 0; i < 26; i++){
 			dictionary.add(new HashMap<String,LookupVal>());
