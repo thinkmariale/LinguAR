@@ -77,7 +77,6 @@ public class MainActivity extends Activity {
 
        }
        
-<<<<<<< Updated upstream
        ReviewMode rm = new ReviewMode();
        try {
 		rm.startLessonPlan();
@@ -87,9 +86,6 @@ public class MainActivity extends Activity {
 	}
        
         String message = "hello";
-=======
-       String message = "hello";
->>>>>>> Stashed changes
 
        // Create the text view
        TextView textView = new TextView(this);
