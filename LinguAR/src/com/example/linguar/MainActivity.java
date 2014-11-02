@@ -98,7 +98,6 @@ public class MainActivity extends Activity {
        */
         String message = "hello";
 
-
        // Create the text view
        TextView textView = new TextView(this);
        textView.setTextSize(40);
