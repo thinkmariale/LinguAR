@@ -27,6 +27,7 @@ public class MainActivity extends Activity {
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+    	
         super.onCreate(savedInstanceState);
         Dictionary dic = Dictionary.getInstance();
        
@@ -76,6 +77,7 @@ public class MainActivity extends Activity {
 
        }
        
+<<<<<<< Updated upstream
        ReviewMode rm = new ReviewMode();
        try {
 		rm.startLessonPlan();
@@ -85,14 +87,17 @@ public class MainActivity extends Activity {
 	}
        
         String message = "hello";
+=======
+       String message = "hello";
+>>>>>>> Stashed changes
 
-        // Create the text view
-        TextView textView = new TextView(this);
-        textView.setTextSize(40);
-        textView.setText(message);
+       // Create the text view
+       TextView textView = new TextView(this);
+       textView.setTextSize(40);
+       textView.setText(message);
 
-        // Set the text view as the activity layout
-        setContentView(textView);
+       // Set the text view as the activity layout
+       setContentView(textView);
        // setContentView(R.layout.activity_main);
     }
 
