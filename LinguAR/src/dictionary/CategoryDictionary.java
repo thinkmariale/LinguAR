@@ -1,12 +1,18 @@
 package dictionary;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 
-public class CategoryDictionary {
+public class CategoryDictionary implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	private static CategoryDictionary instance = new CategoryDictionary();
 	
 	private static HashMap<Category, List<String> > category_dictionary;
@@ -27,6 +33,9 @@ public class CategoryDictionary {
 		category_dictionary = c;
 	}
 	
+	public HashMap<Category, List<String> > getCatDictionary(){
+		return category_dictionary;
+	} 
 	
 	//Function will increase count to category
 	public void increaseCount(Category cat)

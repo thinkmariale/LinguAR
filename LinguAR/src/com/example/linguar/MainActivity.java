@@ -1,6 +1,7 @@
 package com.example.linguar;
 
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
@@ -14,6 +15,7 @@ import dictionary.Word;
 import dictionary.dictionary_populator;
 import android.app.Activity;
 
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,11 +33,17 @@ public class MainActivity extends Activity {
     	
         super.onCreate(savedInstanceState);
         Dictionary dic = Dictionary.getInstance();
+       CategoryDictionary cat = CategoryDictionary.getInstance();
        
+        String filePath = "Users/mariale/Documents/dictionary.ser"; //getFilesDir().getPath().toString() + "/dictionary.ser";
+		String filePath1 = "Users/mariale/Documents/cat_dictionary.ser";//getFilesDir().getPath().toString() + "/cat_dictionary.ser";
+		
         try {
         	Serialization s = new Serialization();
-        	s.loadData();
+        	s.loadData(filePath, filePath1);
         	
+        	if(cat.getCatDictionary().isEmpty())
+        		Log.d("READING_FILE", " cat empty!");
         	if(dic.getDictionary().isEmpty()){
         		Log.d("READING_FILE", "empty!");
         		creator = new dictionary_populator();
@@ -55,7 +63,8 @@ public class MainActivity extends Activity {
         			creator.createCategoryDic(inputStream);
         		}
         		
-        		s.saveData();
+        		
+        		s.saveData(filePath, filePath1);
         	}
         	else
         		Log.d("READING_FILE", "not empty!");
@@ -65,7 +74,7 @@ public class MainActivity extends Activity {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-        /*
+        
      // Get the message from the intent
       
         String []test = {"apple", "banana","peach","car","bike"};
@@ -76,7 +85,7 @@ public class MainActivity extends Activity {
         	Log.d("DIC","word " + x.englishWord + " " +  x.spanishTranslation);
         }
         
-        CategoryDictionary cat = CategoryDictionary.getInstance();
+  
        List<Category> listCat = cat.getTopCategories();
        Log.d("DIC", "Size list " + listCat.size());
        for(Category c: listCat)
@@ -88,14 +97,14 @@ public class MainActivity extends Activity {
 
        }
        
-       ReviewMode rm = new ReviewMode();
-       try {
-		rm.startLessonPlan();
-	} catch (Exception e) {
+       //ReviewMode rm = new ReviewMode();
+     //  try {
+		//rm.startLessonPlan();
+	//} catch (Exception e) {
 		// TODO Auto-generated catch block
-		e.printStackTrace();
-	}
-       */
+	//	e.printStackTrace();
+	//}
+       
         String message = "hello";
 
        // Create the text view
@@ -104,8 +113,8 @@ public class MainActivity extends Activity {
        textView.setText(message);
 
        // Set the text view as the activity layout
-       setContentView(textView);
-       // setContentView(R.layout.activity_main);
+      // setContentView(textView);
+        setContentView(R.layout.activity_main);
     }
 
 

@@ -1,26 +1,32 @@
 package dictionary;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.HashMap;
-import java.util.List;
 
-public class Dictionary {
+import android.util.Log;
+
+public class Dictionary implements Serializable {
 	
-
-	private static List<HashMap<String, LookupVal>> dictionary;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 12L;
+	private static Dictionary instance = new Dictionary( );
+	//private static List<HashMap<String, LookupVal>> dictionary;
+	private static HashMap<String, Word> dictionary;
 	
 	// initializer 
 	{
-
-		dictionary = new ArrayList<HashMap<String, LookupVal>>();
+		dictionary = new HashMap<String, Word>();
+		/*
 		for(int i = 0; i < 26; i++){
 			dictionary.add(new HashMap<String,LookupVal>());
-		}
+		}*/
 		
 	}
 	
@@ -28,54 +34,70 @@ public class Dictionary {
 		
 	}
 	
+	//get instance
+	/* Static 'instance' method */
+	 public static Dictionary getInstance( ) {
+	      return instance;
+	 }
+	   
 	// Format of english/spanish dictionary??
-	
-	public void LoadDictionary(String filename){
-
-        //removed statement from try
-        BufferedReader br;
-		try {
-            br = new BufferedReader(new FileReader(filename));
-		    for(String line; (line = br.readLine()) != null; ) {
-		    	String[] wordlist = (line.split(","));
-		    	
-		    	int c = getIndex(line);
-		    	
-		    	dictionary.get(c).put(wordlist[0], new LookupVal(wordlist[0],wordlist[1]));
-		    }
-		    
-		} catch (FileNotFoundException e) {
-			System.out.println("error finding file");
-			e.printStackTrace();
-		} catch (IOException e) {
-			System.out.println("error during file IO");
-			e.printStackTrace();
+	public void LoadDictionary(InputStream inputStream) throws IOException{
+		
+		dictionary = new HashMap<String, Word>();
+		InputStreamReader is = new InputStreamReader(inputStream);
+		BufferedReader br = new BufferedReader(is);
+		
+		 Log.d("DIC", "in dic!");
+		
+		 String read          = br.readLine();
+		 while(read != null) {
+			 String[] wordlist = (read.split(","));
+			 dictionary.put(wordlist[0], new Word(wordlist[0],wordlist[1]) );
+			 read = br.readLine();
 		}
+		 	
+		 Log.d("DIC","dic length " + String.valueOf( dictionary.size() ));
+	}
+	
 
-		
-		
-	}
-	
-	public List<HashMap<String,LookupVal>> getDictionary(){
+	public HashMap<String,Word> getDictionary(){
 		return dictionary;
+	} 
+	
+	public void setCategory(String word, Category cat)
+	{
+		dictionary.get(word).categoryList.add(cat);
 	}
 	
-	public LookupVal find(String w){
+	//Function to get word and if its being shown, increment category count
+	public Word getWord(String w, boolean isDisplayed)
+	{
+		if(dictionary.containsKey(w))
+		{
+			if(isDisplayed) {
+				dictionary.get(w).incrementCategoryCount();
+			}
+			return dictionary.get(w);
+		}
+		
+		return null;
+	}
+
+	/*public LookupVal find(String w){
 		
 		int c = getIndex(w);
-		
-		return dictionary.get(c).get(w.toLowerCase());
+		return dictionary.get(c).get(w);
 		
 	}
 	
 	
-	public LookupVal addWord(String w, LookupVal l){
+	public Word addWord(String w, Word l){
 				
 		int c = getIndex(w);
 		
 		return dictionary.get(c).put(w, l);
 				
-	}
+	}*/
 	
 	public boolean updateWordTranslation(){
 		boolean result = false;
@@ -84,7 +106,7 @@ public class Dictionary {
 	}
 	
 	
-	public int fullUpdate(Dictionary d){
+	/*public int fullUpdate(Dictionary d){
 		int numAdded = 0;
 		
 		for (int i = 0; i <26; i++){
@@ -99,7 +121,7 @@ public class Dictionary {
 		
 		
 		return numAdded;
-	}
+	}*/
 	
 	public int getIndex(String w){
 		char c = w.charAt(0);
@@ -109,16 +131,6 @@ public class Dictionary {
 		}
 		c -= 97;
 		return c;
-	}
-	
-	public static void main(String[] args) {
-	
-			Dictionary d = new Dictionary();
-			d.LoadDictionary("dictionarySpEn1.txt");
-			
-			System.out.println("loaded");
-			
-			System.out.println(d.find("steak"));
 	}
 	
 	

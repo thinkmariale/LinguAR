@@ -5,12 +5,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Serializable;
 import java.util.HashMap;
 
 import android.util.Log;
 
-public class Dictionary {
+public class Dictionary implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 12L;
 	private static Dictionary instance = new Dictionary( );
 	//private static List<HashMap<String, LookupVal>> dictionary;
 	private static HashMap<String, Word> dictionary;

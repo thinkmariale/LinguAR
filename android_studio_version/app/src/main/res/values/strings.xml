@@ -4,5 +4,8 @@
     <string name="app_name">LinguARv1</string>
     <string name="title_activity_main">Hello World Immersion</string>
     <string name="hello_world">Hello world!</string>
+    <string name="title_activity_main_activity2">Hello World Immersion</string>
+    <string name="title_activity_my">MyActivity</string>
+    <string name="action_settings">Settings</string>
 
 </resources>
