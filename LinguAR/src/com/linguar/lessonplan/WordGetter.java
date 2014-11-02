@@ -32,13 +32,13 @@ public class WordGetter{
 		//Get all the words from the supplied list of categories
 		for (Category category : categoryList) {
 			System.out.println("Category : "+ category.category);
-			 allCategoryWords = _cDictionary.getWordsFromCategory(category);
-			 System.out.println("Number of words in the category increased the size to : "+ allCategoryWords);
+			 allCategoryWords.addAll(_cDictionary.getWordsFromCategory(category));
 		}
 		
 		//Shuffle the obtained list of words
 		Collections.shuffle(allCategoryWords);
-		
+		 System.out.println("Words in these categories are : "+ allCategoryWords);
+
 		return allCategoryWords;
 	}
 

@@ -72,8 +72,5 @@ public class dictionary_populator {
 		CategoryDictionary cat = CategoryDictionary.getInstance();
 		cat.setCategoryDic(category_dictionary);
 
-		//Displaying the words
-		ReviewMode rm = new ReviewMode();
-		rm.startLessonPlan();
 	}
 }
