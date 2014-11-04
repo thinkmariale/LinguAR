@@ -1,36 +1,25 @@
 package com.example.kyna.linguarv1;
 
-import com.google.android.glass.media.Sounds;
 import com.google.android.glass.widget.CardBuilder;
 import com.google.android.glass.widget.CardScrollAdapter;
 import com.google.android.glass.widget.CardScrollView;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.media.AudioManager;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-
-import java.util.Random;
-import java.lang.Integer;
-
-import dictionary.Dictionary;
-import dictionary.LookupVal;
 
 /**
  * An {@link Activity} showing a tuggable "Hello World!" card.
@@ -221,7 +210,7 @@ public class MainActivity extends Activity implements TextToSpeech.OnInitListene
                     mView = buildView();
                     System.out.println("lastWordSaid is "+lastWordSaid);
                     //else, pronounce selected word
-                    repeatTTS.speak(lastWordSaid+" idiot", TextToSpeech.QUEUE_FLUSH, null);
+                    repeatTTS.speak(lastWordSaid+" chao", TextToSpeech.QUEUE_FLUSH, null);
                     lastWordSaid = "";
                     mView = buildView();
                 }

@@ -126,7 +126,7 @@ public class CategoryGetter {
 		if(count==defaultCategories.size())
 		{
 			AlertMessage alert =  new AlertMessage();
-			alert.showAlertMessage("You’ve gone through all the default categories of words. This is a contextual vocabulary learning app. Please use the passive mode for a while, to help the app learn more about your vocabulary. You may return back after you’ve done so");
+			alert.showAlertMessage("Youve gone through all the default categories of words. This is a contextual vocabulary learning app. Please use the passive mode for a while, to help the app learn more about your vocabulary. You may return back after youï¿½ve done so");
 			
 			//TODO: Set states as end of mode as soon s this is encountered------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 		}

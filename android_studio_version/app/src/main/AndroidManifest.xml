@@ -19,6 +19,15 @@
                 android:name="com.google.android.glass.VoiceTrigger"
                 android:resource="@xml/voice_trigger" />
         </activity>
+        <activity
+            android:name=".MainActivity2"
+            android:icon="@drawable/ic_glass_logo"
+            android:label="@string/title_activity_main_activity2" >
+        </activity>
+        <activity
+            android:name="com.example.linguar.EmulatorTest"
+            android:label="@string/title_activity_my" >
+        </activity>
     </application>
 
 </manifest>
