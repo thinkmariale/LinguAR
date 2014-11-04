@@ -19,6 +19,16 @@
                 android:name="com.google.android.glass.VoiceTrigger"
                 android:resource="@xml/voice_trigger" />
         </activity>
+        <activity
+            android:name=".LessonActivity"
+            android:icon="@drawable/ic_glass_logo"
+            android:label="@string/title_activity_lesson" >
+        </activity>
+        <activity
+            android:name=".ListenerActivity"
+            android:icon="@drawable/ic_glass_logo"
+            android:label="@string/title_activity_listener" >
+        </activity>
     </application>
 
 </manifest>
