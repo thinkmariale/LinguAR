@@ -1,34 +1,21 @@
 package com.example.kyna.linguarv1;
 
+import com.google.android.glass.media.Sounds;
+import com.google.android.glass.touchpad.Gesture;
+import com.google.android.glass.touchpad.GestureDetector;
 import com.google.android.glass.widget.CardBuilder;
 import com.google.android.glass.widget.CardScrollAdapter;
 import com.google.android.glass.widget.CardScrollView;
-import com.google.android.glass.touchpad.Gesture;
-import com.google.android.glass.touchpad.GestureDetector;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
-
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
-import android.os.Bundle;
-import android.speech.RecognizerIntent;
-import android.speech.tts.TextToSpeech;
-
 import android.media.AudioManager;
 import android.os.Bundle;
-
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.MotionEvent;
 import android.widget.AdapterView;
-
-import android.widget.ListView;
-import android.widget.Toast;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
 
 
 /**
@@ -87,21 +74,6 @@ public class MainActivity extends Activity {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Plays disallowed sound to indicate that TAP actions are not supported.
-
-                //AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-                //am.playSoundEffect(Sounds.DISALLOWED);
-
-                //detect words
-                if(lastWordSaid == "") {
-                }
-                else{
-                    mView = buildView();
-                    System.out.println("lastWordSaid is "+lastWordSaid);
-                    //else, pronounce selected word
-                    repeatTTS.speak(lastWordSaid+" chao", TextToSpeech.QUEUE_FLUSH, null);
-                    lastWordSaid = "";
-                    mView = buildView();
-                }
 
                 AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
                 am.playSoundEffect(Sounds.DISALLOWED);
