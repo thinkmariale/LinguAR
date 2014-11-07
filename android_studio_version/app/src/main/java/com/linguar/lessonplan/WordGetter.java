@@ -15,7 +15,7 @@ public class WordGetter{
 	private CategoryDictionary _cDictionary;	
 	
 	/**
-	 * Returns the list of all words from the list of Categories. The list is shuffled
+	 * Returns the list of 14 words from the list of Categories. The list is shuffled
 	 * @param categoryList List of Categories
 	 * @return List of all the words from the supplied list of categories
 	 * @throws Exception In case of the method is supplied with less than 5 categories, this exception is called

@@ -12,7 +12,6 @@ public class LessonPlanStats {
 	public int numCorrect;
 	public int numIncorrect;
 	public double percentCorrect;
-	public int timesShownSinceLastTime; // This is for the active mode where the system would be showing the word to the user a few number of times
 	public int timesShownSinceBeginnning;
 	public String lastShown;
 	
@@ -25,7 +24,6 @@ public class LessonPlanStats {
 		numCorrect = 0;
 		numIncorrect = 0;
 		percentCorrect = 0;
-		timesShownSinceLastTime = 0;
 		timesShownSinceBeginnning = 0;
 		lastShown = "";
 	}
@@ -35,7 +33,6 @@ public class LessonPlanStats {
 		numCorrect = 0;
 		numIncorrect = 0;
 		percentCorrect = 0;
-		timesShownSinceLastTime = 0;
 		timesShownSinceBeginnning = 0;
 
 		lastShown =  "";
@@ -67,8 +64,7 @@ public class LessonPlanStats {
 		else{
 			percentCorrect = 0;
 		}
-		timesShownSinceLastTime = numCorrect + numIncorrect;
-		timesShownSinceBeginnning = 0;
+		//timesShownSinceBeginnning = 0;
 		
 	}
 
