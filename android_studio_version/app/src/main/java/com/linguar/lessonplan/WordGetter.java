@@ -1,21 +1,32 @@
 package com.linguar.lessonplan;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import dictionary.Category;
 import dictionary.CategoryDictionary;
+import dictionary.Dictionary;
 import dictionary.Word;
 
+/**
+ *
+ */
 public class WordGetter{
 	
 
 	public final int MAX_WORDS_IN_24_HOURS = 7;
-	private CategoryDictionary _cDictionary;	
-	
-	/**
-	 * Returns the list of 14 words from the list of Categories. The list is shuffled
+	private CategoryDictionary _cDictionary;
+    private Dictionary _dictionary;
+    private DailyLessonQuota _dQuota;
+
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddkkmmss");
+    private long todaysDate;
+    /**
+	 * Returns the list of 7 words from the list of Categories. The list is shuffled. These words have not been shown in the last 24 hours
 	 * @param categoryList List of Categories
 	 * @return List of all the words from the supplied list of categories
 	 * @throws Exception In case of the method is supplied with less than 5 categories, this exception is called
@@ -23,6 +34,9 @@ public class WordGetter{
 	public List<String> getWordsFromCategoryList(List<Category> categoryList) throws Exception
 	{
 		 _cDictionary =  CategoryDictionary.getInstance();
+        _dictionary = Dictionary.getInstance();
+        _dQuota = DailyLessonQuota.getInstance();
+        todaysDate = Long.getLong(sdf.format(Calendar.getInstance().getTime()));
 		List<String> allCategoryWords =  new ArrayList<String>();
 		
 		if(categoryList.size() < 5)
@@ -44,18 +58,34 @@ public class WordGetter{
 			categoryList.add(newCategory);
 			allCategoryWords.addAll(_cDictionary.getWordsFromCategory(newCategory));
 		}
-		
-		//Shuffle the obtained list of words
-		Collections.shuffle(allCategoryWords);
-		
-		List<String> _14Words = new ArrayList<String>();
-		for(int i=0; i<14; i++)
-		{
-		_14Words.add(allCategoryWords.get(i));
-		}
-		 System.out.println("Words in these categories are : "+ _14Words);
 
-		return _14Words;
+        //Get the 7 words that are to be shuffled and sent for the day.
+		List<String> finalWordList = new ArrayList<String>();
+        HashMap<String, Word> wordDictionary = _dictionary.getDictionary();
+
+        for(String word : allCategoryWords)
+        {
+            String lastShown = wordDictionary.get(word).stats.lastShown;
+            if(lastShown!=null || lastShown !="")
+            {
+                if(todaysDate-Long.getLong(lastShown)>=1000000) //Differece of 24 hours
+                    finalWordList.add(word);
+            }
+            else
+            {
+                finalWordList.add(word);
+            }
+
+            if(finalWordList.size() == _dQuota.NO_OF_WORDS_TO_BE_SHOWN_PER_DAY)
+                break;
+        }
+
+		//Shuffle the obtained list of words
+		Collections.shuffle(finalWordList);
+
+		 System.out.println("Words in these categories are : "+ finalWordList);
+
+		return finalWordList;
 	}
 
 }

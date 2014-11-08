@@ -1,39 +1,30 @@
 package com.linguar.lessonplan;
 import dictionary.Category;
-import dictionary.CategoryDictionary;
 import dictionary.Word;
-import dictionary.dictionary_populator;
 import dictionary.Dictionary;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+
 public class ReviewMode {
-	
+
 	private CategoryGetter _cGetter =  new CategoryGetter();
 	private WordGetter _wGetter = new WordGetter();
 	private DailyLessonQuota dQuota = DailyLessonQuota.getInstance();
 	private Dictionary _dictionary = Dictionary.getInstance();
 	private DisplayWordModeA _displayModeA = new DisplayWordModeA();
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddkkmmss");
-    private SimpleDateFormat todaysDate = new SimpleDateFormat("yyyyMMdd");
 	private final int WAIT_BETWEEN_2_WORDS = 7000; //in milliseconds
     private List<String> englishWords;
-	
-	public void startLessonPlan() throws Exception
-	{
-        //Check for any
-        dQuota.deserializeLoad();
-        Set<String> tempSet = dQuota.wordsShown.keySet();
-        if(tempSet!=null) {
-            List<String> retrievedWords = new ArrayList<String>();
-            for (String s : tempSet) {
-                retrievedWords.add(s);
-            }
-            englishWords = retrievedWords;
-        }
+	private int timesDisplayed = 0;
 
-        if(englishWords==null) {
+	public void startLessonPlan() throws Exception {
+        //Get words from the daily lesson plan
+        englishWords = dQuota.resolveDatesAndReturnWords();
+
+        //If the lesson plan is opened on a new day or, if it is being used for the first time, the system will load 14 words from top 5 categories
+        if (englishWords == null) {
             //Call to saved categories
             List<Category> topFiveCategories = _cGetter.getTopFiveCategories();
 
@@ -41,34 +32,42 @@ public class ReviewMode {
             englishWords = _wGetter.getWordsFromCategoryList(topFiveCategories);
         }
 
-		//Get Spanish Translation
-		HashMap<String, Word> wordDictionary= _dictionary.getDictionary();
-		
-		for (String englishWord : englishWords) {
-			Word word = wordDictionary.get(englishWord);
-			if(dQuota.wordsShown.containsKey(englishWord))
-				if(dQuota.wordsShown.get(englishWord) <3) {
-                    _displayModeA.showWord(word.englishWord, word.spanishTranslation);
-                    updateWordStats(word);
+        //Get Spanish Translation
+        HashMap<String, Word> wordDictionary = _dictionary.getDictionary();
+
+            for(int i = 0; i<dQuota.NO_OF_TIMES_PER_WORD; i++) {
+
+                for (String englishWord : englishWords) {
+                    if (dQuota.wordsShown.get(englishWord) < dQuota.NO_OF_TIMES_PER_WORD) {
+                        Word word = wordDictionary.get(englishWord);
+                        _displayModeA.showWord(word.englishWord, word.spanishTranslation);
+                        updateWordStats(word);
+                        timesDisplayed++;
+                        //Wait for few seconds before showing the next word
+                        Thread.sleep(WAIT_BETWEEN_2_WORDS);
+                    }
                 }
-			
-			//Wait for few seconds before showing the next word
-			Thread.sleep(WAIT_BETWEEN_2_WORDS);
-		}
-		
-		//Repeat them 3 times and update their repeat count and timestamp
-		
-		
-		//Start off a timer that would keep track of the words that have started.
-		
-	}
+                Collections.shuffle(englishWords); //Shuffle after every one round of words
+            }
+
+        if(timesDisplayed==0)
+        {
+            AlertMessage alert =  new AlertMessage();
+            alert.showAlertMessage("You've finished the lesson plan for today. Please revisit tomorrow to learn more words.");
+        }
+
+    }
 
     private void updateWordStats(Word word)
     {
-        dQuota.wordsShown.put(word.englishWord,dQuota.wordsShown.get(word.englishWord)+1);
+        if(dQuota.wordsShown.containsKey(word.englishWord)) // This is when the list of words are picked from the daily lesson plan
+        dQuota.wordsShown.put(word.englishWord, dQuota.wordsShown.get(word.englishWord) + 1);
+
+        else
+        dQuota.wordsShown.put(word.englishWord, 1); // This is when a fresh list of words is picked up instead of a saved daily lesson list
+
         word.stats.timesShownSinceBeginnning+=1;
         word.stats.lastShown=sdf.format(Calendar.getInstance().getTime());
     }
-
 
 }
