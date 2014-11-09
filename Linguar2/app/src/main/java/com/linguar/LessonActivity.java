@@ -11,6 +11,7 @@ import com.google.android.glass.touchpad.GestureDetector;
 import com.google.android.glass.widget.CardBuilder;
 import com.google.android.glass.widget.CardScrollAdapter;
 import com.google.android.glass.widget.CardScrollView;
+import com.linguar.lessonplan.LessonPlan;
 
 import android.content.Context;
 import android.content.Intent;
@@ -21,16 +22,25 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 
 public class LessonActivity extends Activity {
 
     private GestureDetector mGestureDetector;
+    private LessonPlan lessonPlan = LessonPlan.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mGestureDetector = createGestureDetector(this);
 
+        String filePath = getFilesDir().getPath() + "/LessonPlan.ser";
+        deserializeLoadData(filePath);
         setContentView(R.layout.activity_lesson);
     }
 
@@ -108,5 +118,61 @@ public class LessonActivity extends Activity {
             return mGestureDetector.onMotionEvent(event);
         }
         return false;
+    }
+
+
+    public void serializeSaveData(String filePath)
+    {
+        FileOutputStream fileOut = null;
+        ObjectOutputStream out = null;
+        FileOutputStream fileOut1 = null;
+        ObjectOutputStream out1 = null;
+
+        try
+        {
+            // LessonPlanSerialzed
+            fileOut = new FileOutputStream(filePath);
+            out   = new ObjectOutputStream(fileOut);
+            out.writeObject(lessonPlan);
+            out.close();
+            fileOut.close();
+            System.out.printf("Serialized data is saved in LessonPlan.ser");
+        }
+        catch(Exception i)
+        {
+            i.printStackTrace();
+        }
+    }
+
+    public void deserializeLoadData(String filePath)
+    {
+        // Load Dictionary/CategoryDictionary from file
+        try
+        {
+            FileInputStream fileIn = new FileInputStream(filePath);
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            lessonPlan = (LessonPlan) in.readObject();
+            in.close();
+            fileIn.close();
+        }
+        catch(IOException i)
+        {
+            i.printStackTrace();
+            return;
+        }
+        catch(ClassNotFoundException c)
+        {
+            System.out.println("LessonPlan class not found");
+            c.printStackTrace();
+            return;
+        }
+
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        String filePath = getFilesDir().getPath() + "/LessonPlan.ser";
+        serializeSaveData(filePath);
     }
 }

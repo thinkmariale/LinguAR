@@ -11,14 +11,4 @@ public class ScoreKeeper {
     {
         return  skeeper;
     }
-
-    public void serializeSave()
-    {
-
-    }
-
-    private void deserializeLoad()
-    {
-
-    }
 }
