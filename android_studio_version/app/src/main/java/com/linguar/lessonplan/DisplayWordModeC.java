@@ -1,23 +1,24 @@
 package com.linguar.lessonplan;
 
 /**
- * Created by Adarshkumar Pavani on 09/11/2014.
+ * Created by idealboy on 09/11/2014.
  */
-public class DisplayWordModeB {
+public class DisplayWordModeC {
 
     void displayWord(String word)
     {
-        NormalTestGenerator.NTStates = NormalTestGenerator.NormalTestStates.englishWordDisplayed;
+        BonusTestGenerator.BTStates = BonusTestGenerator.BonusTestStates.englishWordDisplayed;
         System.out.println(word);
     }
 
     void displayTranslation(String translation)
     {
-        NormalTestGenerator.NTStates = NormalTestGenerator.NormalTestStates.spanishTranslationDisplayed;
+        BonusTestGenerator.BTStates = BonusTestGenerator.BonusTestStates.spanishWordPlayedAndDisplayed;
         System.out.println("The translation is" +" : " + translation);
+        playWord();
     }
 
-    void displayTimer(int time)
+    void displayTimer(int time) //  Time in milliseconds
     {
     }
 
@@ -42,6 +43,6 @@ public class DisplayWordModeB {
 
     void clearScreen()
     {
-        NormalTestGenerator.NTStates = NormalTestGenerator.NormalTestStates.clearScreen;
+        BonusTestGenerator.BTStates = BonusTestGenerator.BonusTestStates.clearScreen;
     }
 }
