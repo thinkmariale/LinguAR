@@ -12,10 +12,13 @@ public class ReviewMode {
 	private CategoryGetter _cGetter =  new CategoryGetter();
 	private WordGetter _wGetter = new WordGetter();
 	private DailyLessonQuota dQuota = DailyLessonQuota.getInstance();
+    private CumulativeWordsLearnt wLearnt =  CumulativeWordsLearnt.getInstance();
 	private Dictionary _dictionary = Dictionary.getInstance();
+    private ScoreKeeper _skeeper =  ScoreKeeper.getInstance();
 	private DisplayWordModeA _displayModeA = new DisplayWordModeA();
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddkkmmss");
 	private final int WAIT_BETWEEN_2_WORDS = 7000; //in milliseconds
+    private final int SCORE_FOR_LEARNING = 100;
     private List<String> englishWords;
 	private int timesDisplayed = 0;
 
@@ -42,6 +45,14 @@ public class ReviewMode {
                         Word word = wordDictionary.get(englishWord);
                         _displayModeA.showWord(word.englishWord, word.spanishTranslation);
                         updateWordStats(word);
+
+                        //Adding the words to the hashmap of learnt words and updating the score
+                        if(!wLearnt.wordsLearnt.contains(word.englishWord)) {
+                            wLearnt.wordsLearnt.add(word.englishWord);
+                            _skeeper.score += SCORE_FOR_LEARNING;
+                        }
+
+
                         timesDisplayed++;
                         //Wait for few seconds before showing the next word
                         Thread.sleep(WAIT_BETWEEN_2_WORDS);

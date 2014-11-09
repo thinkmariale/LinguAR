@@ -14,8 +14,7 @@ public class LessonPlanStats {
 	public double percentCorrect;
 	public int timesShownSinceBeginnning;
 	public String lastShown;
-    public int timesShownIn24Hours;
-	
+
 	// Date Format that works
 	//private Date date = new Date();
 	//private DateFormat sdf =  new SimpleDateFormat("yyyyMMddkkmmss",Locale.US);
@@ -26,7 +25,6 @@ public class LessonPlanStats {
 		numIncorrect = 0;
 		percentCorrect = 0;
 		timesShownSinceBeginnning = 0;
-        timesShownIn24Hours = 0;
 		lastShown = "";
 	}
 	
@@ -36,7 +34,6 @@ public class LessonPlanStats {
 		numIncorrect = 0;
 		percentCorrect = 0;
 		timesShownSinceBeginnning = 0;
-        timesShownIn24Hours = 0;
 		lastShown =  "";
 	}
 	
