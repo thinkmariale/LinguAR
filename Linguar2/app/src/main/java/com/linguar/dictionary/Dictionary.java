@@ -52,6 +52,7 @@ public class Dictionary implements Serializable {
 		 String read          = br.readLine();
 		 while(read != null) {
 			 String[] wordlist = (read.split(","));
+
 			 dictionary.put(wordlist[0], new Word(wordlist[0],wordlist[1]) );
 			 read = br.readLine();
 		}
@@ -72,6 +73,7 @@ public class Dictionary implements Serializable {
 	//Function to get word and if its being shown, increment category count
 	public Word getWord(String w, boolean isDisplayed)
 	{
+
 		if(dictionary.containsKey(w))
 		{
 			if(isDisplayed) {

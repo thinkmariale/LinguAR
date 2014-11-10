@@ -91,6 +91,7 @@ public class MainActivity extends Activity {
         Dictionary dic = Dictionary.getInstance();
         CategoryDictionary cat = CategoryDictionary.getInstance();
         dictionary_populator creator;
+
         try {
             // Serialization s = new Serialization();
             // s.loadData(filePath, filePath1);
@@ -101,6 +102,8 @@ public class MainActivity extends Activity {
                 Log.d("READING_FILE", "empty!");
                 creator = new dictionary_populator();
                 AssetManager assetManager = getResources().getAssets();
+                Log.d("READING_FILE", assetManager.toString());
+
                 InputStream inputStream = null;
                 inputStream = assetManager.open("finalCategories.txt");
                 InputStream inputStream1 = null;
@@ -116,7 +119,16 @@ public class MainActivity extends Activity {
                     creator.createCategoryDic(inputStream);
                 }
 
+                if(!dic.getDictionary().isEmpty() && !cat.getCatDictionary().isEmpty() ){
+                    Log.d("READING_FILE", "done!");
+                    String []test = {"apple", "banana","peach","car","bike"};
 
+                    for(String str: test)
+                    {
+                        Word x = dic.getWord(str, true);
+                        Log.d("DIC","word " + x.englishWord + " " +  x.spanishTranslation);
+                    }
+                }
                 // s.saveData(filePath, filePath1);
             }
             else

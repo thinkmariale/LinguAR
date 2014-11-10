@@ -65,7 +65,7 @@ public class VoiceRecognitionActivity extends Activity implements
                 this.getPackageName());
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
                 RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
-       // recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
 
         toggleButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -159,17 +159,22 @@ public class VoiceRecognitionActivity extends Activity implements
 
         String all[] = text.split(" ");
 
+        if(dic.getDictionary().isEmpty())  Log.d(LOG_TAG,"EMPTY DIC");
         String textFinal = "";
-        for(String s : all)
+
+        for(String str : all)
         {
-            Word tempWord = dic.getWord(s, true);
+            str = str.toLowerCase().trim();
+            Log.d(LOG_TAG,"word " + str );
+            Word tempWord = dic.getWord(str, true);
             if(tempWord != null)
             {
                 textFinal += tempWord.englishWord + " ---- "+ tempWord.spanishTranslation + "\n";
             }
+            else  Log.d(LOG_TAG,"word null " + str);
         }
 
-        Log.i(LOG_TAG, "onResults " + textFinal);
+        Log.i(LOG_TAG, "onResults " + textFinal + " "+ text);
         returnedText.setText(textFinal);
         toggleButton.setChecked(true);
     }
