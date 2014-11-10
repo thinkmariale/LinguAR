@@ -1,8 +1,10 @@
 package com.linguar.lessonplan;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 import com.linguar.dictionary.Dictionary;
 import com.linguar.dictionary.Word;
@@ -26,8 +28,12 @@ public class NormalTestGenerator {
     private CumulativeWordsLearnt _wLearnt = CumulativeWordsLearnt.getInstance();
     private Dictionary _dictionary = new Dictionary();
     private ResponseListener _rListerner = new ResponseListener();
+
+    private AlertMessage _alertMessage = new AlertMessage();
     public final int WAIT_FOR_TRANSLATED_TEXT = 7000;
     public final int WAIT_FOR_TRANSLATED_SPEECH = 5000;
+    public final int WAIT_FOR_USER_REPEAT = 5000;
+    public final int NO_OF_WORDS_PER_TEST = 10;
 
     void startNormalTest() throws Exception
     {
@@ -37,9 +43,29 @@ public class NormalTestGenerator {
         if(wordsForTest==null)
             return;
 
-        Collections.shuffle(wordsForTest);
+        List<String> subsetWords = new ArrayList<String>();
 
-        for(String word : wordsForTest)
+        if(wordsForTest.size() <= NO_OF_WORDS_PER_TEST) {
+            subsetWords = wordsForTest;
+        }
+        else {
+            List<Integer> indicesFound = new ArrayList<Integer>();
+            Random rand = new Random();
+            while (subsetWords.size() != NO_OF_WORDS_PER_TEST) {
+                int random = rand.nextInt(wordsForTest.size());
+                if(indicesFound.contains(random))
+                    continue;
+                else
+                {
+                    subsetWords.add(wordsForTest.get(random));
+                    indicesFound.add(random);
+                }
+            }
+        }
+
+        Collections.shuffle(subsetWords);
+
+        for(String word : subsetWords)
         {
             _modeB.clearScreen();
 
@@ -59,11 +85,12 @@ public class NormalTestGenerator {
 
             //Speak translation and wait for few seconds
             _modeB.playWord();
+            _modeB.displayTimer(WAIT_FOR_USER_REPEAT);
             _rListerner.listenAndValidate(wordDictionary.get(word), NTStates);
-
-
         }
 
+
+    _alertMessage.showAlertMessage("End of Test");
     }
 
 }
