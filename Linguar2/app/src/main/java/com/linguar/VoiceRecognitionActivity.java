@@ -24,6 +24,8 @@ import android.widget.ToggleButton;
 
 import com.google.android.glass.touchpad.Gesture;
 import com.google.android.glass.touchpad.GestureDetector;
+import com.linguar.dictionary.Dictionary;
+import com.linguar.dictionary.Word;
 
 public class VoiceRecognitionActivity extends Activity implements
         RecognitionListener {
@@ -37,12 +39,15 @@ public class VoiceRecognitionActivity extends Activity implements
     private Intent recognizerIntent;
     private String LOG_TAG = "VoiceRecognitionActivity";
 
+    private Dictionary dic = Dictionary.getInstance();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_voice_recognition);
 
         mGestureDetector = createGestureDetector(this);
+        dic = Dictionary.getInstance();
 
         //---
         Log.d(LOG_TAG, "creating VoiceRecognitionActivity");
@@ -148,12 +153,24 @@ public class VoiceRecognitionActivity extends Activity implements
                 .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
         String text = "";
 
+        //showing translation of word
         for (String result : matches)
             text += result + "\n";
 
+        String all[] = text.split(" ");
 
-        Log.i(LOG_TAG, "onResults ");
-        returnedText.setText(text);
+        String textFinal = "";
+        for(String s : all)
+        {
+            Word tempWord = dic.getWord(s, true);
+            if(tempWord != null)
+            {
+                textFinal += tempWord.englishWord + " ---- "+ tempWord.spanishTranslation + "\n";
+            }
+        }
+
+        Log.i(LOG_TAG, "onResults " + textFinal);
+        returnedText.setText(textFinal);
         toggleButton.setChecked(true);
     }
 
@@ -214,6 +231,7 @@ public class VoiceRecognitionActivity extends Activity implements
             public boolean onGesture(Gesture gesture) {
                 if (gesture == Gesture.TAP) {
                     // do something on tap
+                    toggleButton.toggle();
                     return true;
                 } else if (gesture == Gesture.TWO_TAP) {
                     // do something on two finger tap
