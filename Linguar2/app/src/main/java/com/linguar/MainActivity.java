@@ -10,12 +10,18 @@ import com.google.android.glass.widget.CardScrollView;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.AssetManager;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+
+import com.linguar.dictionary.*;
+
+import java.io.InputStream;
 
 /**
  * An {@link Activity} showing a tuggable "Hello World!" card.
@@ -80,6 +86,51 @@ public class MainActivity extends Activity {
 
             }
         });
+
+        // load dictionaries
+        Dictionary dic = Dictionary.getInstance();
+        CategoryDictionary cat = CategoryDictionary.getInstance();
+        dictionary_populator creator;
+        try {
+            // Serialization s = new Serialization();
+            // s.loadData(filePath, filePath1);
+
+            if(cat.getCatDictionary().isEmpty())
+                Log.d("READING_FILE", " cat empty!");
+            if(dic.getDictionary().isEmpty()){
+                Log.d("READING_FILE", "empty!");
+                creator = new dictionary_populator();
+                AssetManager assetManager = getResources().getAssets();
+                InputStream inputStream = null;
+                inputStream = assetManager.open("finalCategories.txt");
+                InputStream inputStream1 = null;
+                inputStream1 = assetManager.open("dictionarySpEn1.txt");
+
+                if ( inputStream1 != null) {
+                    Log.d("READING_FILE", "loading file Dic  worked!");
+                    dic.LoadDictionary(inputStream1);
+                }
+
+                if ( inputStream != null) {
+                    Log.d("READING_FILE", "loading file Cat worked!");
+                    creator.createCategoryDic(inputStream);
+                }
+
+
+                // s.saveData(filePath, filePath1);
+            }
+            else
+                Log.d("READING_FILE", "not empty!");
+
+
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+
+
+
         setContentView(mCardScroller);
     }
 

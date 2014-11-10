@@ -23,12 +23,11 @@ public class EmulatorTest extends Activity {
         super.onCreate(savedInstanceState);
 
         // test if loading dic
-// test if loading dic
         Dictionary dic = Dictionary.getInstance();
         CategoryDictionary cat = CategoryDictionary.getInstance(); //"Users/mariale/Documents/dictionary.ser";   "Users/mariale/Documents/cat_dictionary.ser";
 
-        String filePath =  getFilesDir().getPath().toString() + "/dictionary.ser";
-        String filePath1 =  getFilesDir().getPath().toString() + "/cat_dictionary.ser";
+        String filePath  = getFilesDir().getPath().toString() + "/dictionary.ser";
+        String filePath1 = getFilesDir().getPath().toString() + "/cat_dictionary.ser";
 
         try {
             // Serialization s = new Serialization();
