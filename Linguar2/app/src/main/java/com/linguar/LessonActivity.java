@@ -76,10 +76,10 @@ public class LessonActivity extends Activity implements
         speech = SpeechRecognizer.createSpeechRecognizer(this);
         speech.setRecognitionListener(this);
         recognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "en");
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "sp");
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 10);
 
 
         toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -161,17 +161,33 @@ public class LessonActivity extends Activity implements
         Log.i(LOG_TAG, "onReadyForSpeech");
     }
 
-    @Override
+
+   @Override
     public void onResults(Bundle results) {
 
-      ArrayList<String> matches = results
-                .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-        String text = "";
-
-        for (String result : matches)
-            text += result + "\n";
+       String text = "";
+      /* ArrayList<String> voiceResults = results.getStringArrayList("results_recognition");
 
 
+       if (voiceResults == null) {
+           Log.e(LOG_TAG, "No voice results");
+           ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+
+           for (String result : matches)
+               text += result + "\n";
+
+       } else {
+           Log.d(LOG_TAG, "Printing matches: ");
+           for (String match : voiceResults) {
+               Log.d(LOG_TAG, match);
+               text += match;
+           }
+       }*/
+
+       ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+
+       for (String result : matches)
+           text += result + "\n";
         //TODO
         //texts is what the user said
          Log.i(LOG_TAG, "onResults " + " "+ text);
@@ -304,6 +320,7 @@ public class LessonActivity extends Activity implements
     protected void onDestroy()
     {
         super.onDestroy();
+        speech.destroy();
         serialization.<LessonPlan>saveData_(lessonPlan, filePath);
         String filePath1  = getFilesDir().getPath().toString() + "/dictionary.ser";
         String filePath2 = getFilesDir().getPath().toString() + "/cat_dictionary.ser";

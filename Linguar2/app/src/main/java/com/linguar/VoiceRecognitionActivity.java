@@ -364,5 +364,14 @@ public class VoiceRecognitionActivity extends Activity implements
         }
         return false;
     }
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        speech.destroy();
 
+        serialization.<Dictionary>saveData_(Dictionary.getInstance(),filePath);
+        serialization.<CategoryDictionary>saveData_(CategoryDictionary.getInstance(), filePath1);
+
+    }
 }
