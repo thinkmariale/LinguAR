@@ -48,6 +48,7 @@ public class LessonActivity extends Activity implements
     private GestureDetector mGestureDetector;
     private LessonPlan lessonPlan;
 
+    private TextView testWord;
     private TextView returnedText;
     private ToggleButton toggleButton;
 
@@ -70,6 +71,7 @@ public class LessonActivity extends Activity implements
 
         setContentView(R.layout.activity_lesson);
 
+        testWord     = (TextView) findViewById(R.id.textView2);
         returnedText = (TextView) findViewById(R.id.textView1);
         toggleButton = (ToggleButton) findViewById(R.id.toggleButton1);
 
@@ -188,6 +190,7 @@ public class LessonActivity extends Activity implements
 
        for (String result : matches)
            text += result + "\n";
+
         //TODO
         //texts is what the user said
          Log.i(LOG_TAG, "onResults " + " "+ text);
