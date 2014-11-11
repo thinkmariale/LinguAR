@@ -23,10 +23,7 @@ public class Dictionary implements Serializable {
 	// initializer 
 	{
 		dictionary = new HashMap<String, Word>();
-		/*
-		for(int i = 0; i < 26; i++){
-			dictionary.add(new HashMap<String,LookupVal>());
-		}*/
+
 		
 	}
 	
@@ -72,67 +69,21 @@ public class Dictionary implements Serializable {
 	//Function to get word and if its being shown, increment category count
 	public Word getWord(String w, boolean isDisplayed)
 	{
-
 		if(dictionary.containsKey(w))
 		{
+            // if we are thinking on displaying it, it must have at least 2 categories
 			if(isDisplayed) {
-				dictionary.get(w).incrementCategoryCount();
+                if(dictionary.get(w).incrementCategoryCount())
+                    return dictionary.get(w);
 			}
-			return dictionary.get(w);
+			else
+                return dictionary.get(w);
 		}
 		
 		return null;
 	}
 
-	/*public LookupVal find(String w){
-		
-		int c = getIndex(w);
-		return dictionary.get(c).get(w);
-		
-	}
-	
-	
-	public Word addWord(String w, Word l){
-				
-		int c = getIndex(w);
-		
-		return dictionary.get(c).put(w, l);
-				
-	}*/
-	
-	public boolean updateWordTranslation(){
-		boolean result = false;
-		
-		return result;
-	}
-	
-	
-	/*public int fullUpdate(Dictionary d){
-		int numAdded = 0;
-		
-		for (int i = 0; i <26; i++){
-			if(dictionary.get(i).size() < d.dictionary.get(i).size()){
-				
-				// find and add all new elements
-			}
-			
-			
-		}
-		
-		
-		
-		return numAdded;
-	}*/
-	
-	public int getIndex(String w){
-		char c = w.charAt(0);
-		int pos = (int)c;
-		if(pos < 97){
-			c += 32;
-		}
-		c -= 97;
-		return c;
-	}
-	
+
+
 	
 }

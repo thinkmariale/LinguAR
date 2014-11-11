@@ -56,14 +56,20 @@ public class Word {
 		
 		return englishWord + " : " + spanishTranslation;
 	}
-	
+
+    //--------
 	//function to increment count in categories depending the word said
-	public void incrementCategoryCount()
+	public boolean incrementCategoryCount()
 	{
-		for(Category cat:categoryList)
-		{
-			cat.counter = cat.counter + 1;
+        // min num of cats to consider showing
+        if(categoryList.size() > 2 )
+        {
+	    	for(Category cat:categoryList)
+			    cat.counter = cat.counter + 1;
+            return true;
 		}
+
+        return false;
 	}
 	
 }

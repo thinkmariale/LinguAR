@@ -102,8 +102,10 @@ public class MainActivity extends Activity {
 
 
         try {
+            serialization.<Dictionary>loadData_(dic,filePath);
+            serialization.<CategoryDictionary>loadData_(cat,filePath1);
 
-            serialization.loadData(filePath, filePath1);
+            //serialization.loadData(filePath, filePath1);
 
             if(cat.getCatDictionary().isEmpty())
                 Log.d("READING_FILE", " cat empty!");
@@ -138,7 +140,10 @@ public class MainActivity extends Activity {
                         Log.d("DIC","word " + x.englishWord + " " +  x.spanishTranslation);
                     }*/
                 }
-                serialization.saveData(filePath, filePath1);
+                //serialization.saveData(filePath, filePath1);
+                serialization.<Dictionary>saveData_(dic,filePath);
+                serialization.<CategoryDictionary>saveData_(cat,filePath1);
+
             }
             else
                 Log.d("READING_FILE", "not empty!");
@@ -221,7 +226,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onPause() {
         mCardScroller.deactivate();
-        serialization.saveData(filePath, filePath1);
+        serialization.<Dictionary>saveData_(Dictionary.getInstance(),filePath);
+        serialization.<CategoryDictionary>saveData_(CategoryDictionary.getInstance(),filePath1);
         super.onPause();
     }
 

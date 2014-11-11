@@ -7,8 +7,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -29,6 +31,7 @@ import android.widget.ToggleButton;
 
 import com.google.android.glass.touchpad.Gesture;
 import com.google.android.glass.touchpad.GestureDetector;
+import com.linguar.dictionary.CategoryDictionary;
 import com.linguar.dictionary.Dictionary;
 import com.linguar.dictionary.Word;
 import com.linguar.serialization.Serialization;
@@ -52,7 +55,8 @@ public class VoiceRecognitionActivity extends Activity implements
     private String filePath1;
 
     private Queue mainText;
-    private String current;
+    private Queue removeText;
+    private Set<String> set;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,8 +69,11 @@ public class VoiceRecognitionActivity extends Activity implements
         filePath  = getFilesDir().getPath().toString() + "/dictionary.ser";
         filePath1 = getFilesDir().getPath().toString() + "/cat_dictionary.ser";
 
-        mainText = new LinkedList();
-        current = "";
+        //contains current conversation to display on screen
+        mainText   = new LinkedList();
+        removeText = new LinkedList();
+        set        = new HashSet<String >();
+
         //---
         Log.d(LOG_TAG, "creating VoiceRecognitionActivity");
         returnedText = (TextView) findViewById(R.id.textView1);
@@ -82,6 +89,7 @@ public class VoiceRecognitionActivity extends Activity implements
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
+
         toggleButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
             @Override
@@ -101,7 +109,6 @@ public class VoiceRecognitionActivity extends Activity implements
 
 
 
-
         Thread t = new Thread() {
 
             @Override
@@ -115,10 +122,10 @@ public class VoiceRecognitionActivity extends Activity implements
                                 // update TextView here!
                                 if (!mainText.isEmpty()) {
                                     String str = mainText.element().toString();
-                                    current = str;
                                    // System.out.println("Hello World! " + str);
-                                    returnedText.setText(current);
+                                    returnedText.setText(str);
                                     mainText.remove();
+                                    removeText.add(str);
                                 }
                             }
                         });
@@ -145,7 +152,8 @@ public class VoiceRecognitionActivity extends Activity implements
     @Override
     protected void onPause() {
         super.onPause();
-        serialization.saveData(filePath, filePath1);
+        serialization.<Dictionary>saveData_(dic,filePath);
+        serialization.<CategoryDictionary>saveData_(CategoryDictionary.getInstance(), filePath1);
 
         if (speech != null) {
             speech.destroy();
@@ -182,6 +190,7 @@ public class VoiceRecognitionActivity extends Activity implements
             returnedText.setText(errorMessage);
             toggleButton.setChecked(false);
         }
+       else toggleButton.setChecked(true);
     }
 
     @Override
@@ -212,8 +221,12 @@ public class VoiceRecognitionActivity extends Activity implements
             Word tempWord = dic.getWord(str, true);
             if(tempWord != null)
             {
-                textFinal += tempWord.englishWord + " ---- "+ tempWord.spanishTranslation + "\n";
-                mainText.add(tempWord.englishWord + " ---- "+ tempWord.spanishTranslation + "\n");
+                String t = tempWord.englishWord + " ---- "+ tempWord.spanishTranslation + "\n";
+                if (set.add(t)) {
+                    mainText.add(t);
+                    Log.d(LOG_TAG,"adding " + t);
+                }
+                textFinal += t;
             }
            // else  Log.d(LOG_TAG,"word null " + str);
         }
@@ -231,7 +244,7 @@ public class VoiceRecognitionActivity extends Activity implements
     @Override
     public void onResults(Bundle results) {
 
-        ArrayList<String> matches = results
+      /*  ArrayList<String> matches = results
                 .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
         String text = "";
 
@@ -240,7 +253,14 @@ public class VoiceRecognitionActivity extends Activity implements
             text += result + "\n";
 
 
-       // Log.i(LOG_TAG, "onResults " + textFinal + " "+ text);
+         Log.i(LOG_TAG, "onResults " + textFinal + " "+ text);*/
+
+        while(!removeText.isEmpty())
+        {
+            set.remove(removeText.element().toString());
+            removeText.remove();
+        }
+
         toggleButton.setChecked(true);
     }
 
