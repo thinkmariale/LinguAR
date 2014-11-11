@@ -44,19 +44,18 @@ public class Dictionary implements Serializable {
 	public void LoadDictionary(InputStream inputStream) throws IOException{
 		
 		dictionary = new HashMap<String, Word>();
-		InputStreamReader is = new InputStreamReader(inputStream);
-		BufferedReader br = new BufferedReader(is);
-		
+	//	InputStreamReader is = new InputStreamReader(inputStream,"ISO-8859-1");
+		BufferedReader br = new BufferedReader(new InputStreamReader(inputStream,"ISO-8859-1"));
+
 		 Log.d("DIC", "in dic!");
 		
-		 String read          = br.readLine();
-		 while(read != null) {
-			 String[] wordlist = (read.split(","));
+		 String read = "";
 
-			 dictionary.put(wordlist[0], new Word(wordlist[0],wordlist[1]) );
-			 read = br.readLine();
+        while ((read=br.readLine())!=null){
+			 String[] wordList = (read.split(","));
+			 dictionary.put(wordList[0], new Word(wordList[0],wordList[1]) );
 		}
-		 	
+		 br.close();
 		 Log.d("DIC","dic length " + String.valueOf( dictionary.size() ));
 	}
 	

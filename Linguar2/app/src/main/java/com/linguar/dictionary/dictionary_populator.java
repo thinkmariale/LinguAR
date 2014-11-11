@@ -20,17 +20,17 @@ public class dictionary_populator {
 
 	public void createCategoryDic(InputStream file) throws Exception
 	{
-		System.out.println("creating category directionary");
-		InputStreamReader is = new InputStreamReader(file);
-		BufferedReader br    = new BufferedReader(is);
-		String read          = br.readLine();
+		System.out.println("creating category dictionary");
+		//InputStreamReader is = new InputStreamReader(file);
+		BufferedReader br    = new BufferedReader(new InputStreamReader(file));
+		String read          = "";//br.readLine();
 		StringBuilder sb     = new StringBuilder();
 
-		while(read != null) {
+        while ((read=br.readLine())!=null){
 		   sb.append(read);
-		   read = br.readLine();
 		}
-		
+		br.close();
+
 		// getting main dictionary so we can populate the categories per word
 		Dictionary dic = Dictionary.getInstance();
 		
