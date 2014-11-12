@@ -1,12 +1,13 @@
 package com.linguar.lessonplan;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by Adarshkumar Pavani on 08/11/2014.
  */
-public class CumulativeWordsLearnt {
+public class CumulativeWordsLearnt implements Serializable {
 
     private static CumulativeWordsLearnt wLearnt = new CumulativeWordsLearnt();
 

@@ -19,6 +19,7 @@ import com.linguar.dictionary.CategoryDictionary;
 import com.linguar.dictionary.Dictionary;
 import com.linguar.dictionary.Word;
 import com.linguar.lessonplan.LessonPlan;
+import com.linguar.lessonplan.ReviewMode;
 import com.linguar.serialization.Serialization;
 
 import android.content.Context;
@@ -52,6 +53,7 @@ public class LessonActivity extends Activity implements
     private TextView returnedText;
     private ToggleButton toggleButton;
 
+    private ReviewMode _reviewMode = new ReviewMode();
     private SpeechRecognizer speech = null;
     private Intent recognizerIntent;
     private String LOG_TAG = "LessonActivity";
@@ -83,7 +85,15 @@ public class LessonActivity extends Activity implements
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 10);
 
-
+/*
+        try {
+            _reviewMode.startLessonPlan();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        */
         toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             @Override
@@ -330,6 +340,5 @@ public class LessonActivity extends Activity implements
 
         serialization.<Dictionary>saveData_(Dictionary.getInstance(),filePath1);
         serialization.<CategoryDictionary>saveData_(CategoryDictionary.getInstance(), filePath2);
-
     }
 }

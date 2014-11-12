@@ -1,5 +1,6 @@
 package com.linguar.lessonplan;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -7,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-public class DailyLessonQuota {
+public class DailyLessonQuota implements Serializable {
 
     private static DailyLessonQuota _instance;
 
