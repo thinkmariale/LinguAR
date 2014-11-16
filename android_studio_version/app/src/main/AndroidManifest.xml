@@ -8,7 +8,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.kyna.linguarv1.MainActivity"
             android:icon="@drawable/ic_glass_logo"
             android:label="@string/title_activity_main" >
             <intent-filter>
@@ -24,14 +24,18 @@
             android:label="@string/title_activity_my" >
         </activity>
         <activity
-            android:name=".LessonActivity"
+            android:name="com.example.kyna.linguarv1.LessonActivity"
             android:icon="@drawable/ic_glass_logo"
             android:label="@string/title_activity_lesson" >
         </activity>
         <activity
-            android:name=".ListenerActivity"
+            android:name="com.example.kyna.linguarv1.ListenerActivity"
             android:icon="@drawable/ic_glass_logo"
             android:label="@string/title_activity_listener" >
+        </activity>
+        <activity
+            android:name="com.example.kyna.linguarv1.GPSActivity"
+            android:label="@string/title_activity_gps" >
         </activity>
     </application>
 
