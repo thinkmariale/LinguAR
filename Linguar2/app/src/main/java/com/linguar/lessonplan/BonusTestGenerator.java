@@ -44,9 +44,6 @@ public class BonusTestGenerator {
             if (Long.getLong(sdf.format(Calendar.getInstance().getTime())) - Long.getLong(sdf.format(_btQuota.lastTakenBonusTest)) >= BONUS_TEST_FREQUENCY) {
                 HashMap<String, Word> wordDictionary = _dictionary.getDictionary();
 
-                if (wordsForTest == null)
-                    return;
-
                 Collections.shuffle(wordsForTest);
 
                 for (String word : wordsForTest) {
@@ -57,6 +54,7 @@ public class BonusTestGenerator {
 
                     if (!flag) {
                         _modeC.clearScreen();
+                        _alertMessage.showAlertMessage("End of test");
                         break;
                     }
                 }

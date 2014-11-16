@@ -2,10 +2,17 @@ package com.linguar;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
@@ -24,6 +31,10 @@ import android.widget.ToggleButton;
 
 import com.google.android.glass.touchpad.Gesture;
 import com.google.android.glass.touchpad.GestureDetector;
+import com.linguar.dictionary.CategoryDictionary;
+import com.linguar.dictionary.Dictionary;
+import com.linguar.dictionary.Word;
+import com.linguar.serialization.Serialization;
 
 public class VoiceRecognitionActivity extends Activity implements
         RecognitionListener {
@@ -37,12 +48,31 @@ public class VoiceRecognitionActivity extends Activity implements
     private Intent recognizerIntent;
     private String LOG_TAG = "VoiceRecognitionActivity";
 
+    private Dictionary dic = Dictionary.getInstance();
+
+    private Serialization serialization;
+    private String filePath;
+    private String filePath1;
+
+    private Queue mainText;
+    private Queue removeText;
+    private Set<String> set;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_voice_recognition);
 
         mGestureDetector = createGestureDetector(this);
+        dic = Dictionary.getInstance();
+        serialization = new Serialization();
+        filePath  = getFilesDir().getPath().toString() + "/dictionary.ser";
+        filePath1 = getFilesDir().getPath().toString() + "/cat_dictionary.ser";
+
+        //contains current conversation to display on screen
+        mainText   = new LinkedList();
+        removeText = new LinkedList();
+        set        = new HashSet<String >();
 
         //---
         Log.d(LOG_TAG, "creating VoiceRecognitionActivity");
@@ -54,13 +84,11 @@ public class VoiceRecognitionActivity extends Activity implements
         speech = SpeechRecognizer.createSpeechRecognizer(this);
         speech.setRecognitionListener(this);
         recognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE,
-                "en");
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE,
-                this.getPackageName());
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
-       // recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "en");
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3);
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true);
 
         toggleButton.setOnCheckedChangeListener(new OnCheckedChangeListener() {
 
@@ -79,8 +107,41 @@ public class VoiceRecognitionActivity extends Activity implements
             }
         });
 
+
+
+        Thread t = new Thread() {
+
+            @Override
+            public void run() {
+                try {
+                    while (!isInterrupted()) {
+                        Thread.sleep(800);
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                // update TextView here!
+                                if (!mainText.isEmpty()) {
+                                    String str = mainText.element().toString();
+                                   // System.out.println("Hello World! " + str);
+                                    returnedText.setText(str);
+                                    mainText.remove();
+                                    removeText.add(str);
+                                }
+                            }
+                        });
+                    }
+                } catch (InterruptedException e) {
+                }
+            }
+        };
+
+        t.start();
     }
 
+
+
+
+    // And From your main() method or any other method
 
     @Override
     public void onResume() {
@@ -91,6 +152,9 @@ public class VoiceRecognitionActivity extends Activity implements
     @Override
     protected void onPause() {
         super.onPause();
+        serialization.<Dictionary>saveData_(dic,filePath);
+        serialization.<CategoryDictionary>saveData_(CategoryDictionary.getInstance(), filePath1);
+
         if (speech != null) {
             speech.destroy();
             toggleButton.setChecked(false);
@@ -122,8 +186,11 @@ public class VoiceRecognitionActivity extends Activity implements
     public void onError(int errorCode) {
         String errorMessage = getErrorText(errorCode);
         Log.d(LOG_TAG, "FAILED " + errorMessage);
-        returnedText.setText(errorMessage);
-        toggleButton.setChecked(false);
+        if(errorCode != SpeechRecognizer.ERROR_CLIENT) {
+            returnedText.setText(errorMessage);
+            toggleButton.setChecked(false);
+        }
+       else toggleButton.setChecked(true);
     }
 
     @Override
@@ -133,7 +200,40 @@ public class VoiceRecognitionActivity extends Activity implements
 
     @Override
     public void onPartialResults(Bundle arg0) {
-        Log.i(LOG_TAG, "onPartialResults");
+
+        ArrayList<String> matches = arg0
+                .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+
+        String text = "";
+        //showing translation of word
+        for (String result : matches)
+            text += result + "\n";
+
+        String all[] = text.split(" ");
+
+        if(dic.getDictionary().isEmpty())  Log.d(LOG_TAG,"EMPTY DIC");
+        String textFinal = "";
+
+        for(String str : all)
+        {
+            str = str.toLowerCase().trim();
+           // Log.d(LOG_TAG,"word " + str );
+            Word tempWord = dic.getWord(str, true);
+            if(tempWord != null)
+            {
+                String t = tempWord.englishWord + " ---- "+ tempWord.spanishTranslation + "\n";
+                if (set.add(t)) {
+                    mainText.add(t);
+                    Log.d(LOG_TAG,"adding " + t);
+                }
+                textFinal += t;
+            }
+           // else  Log.d(LOG_TAG,"word null " + str);
+        }
+
+
+        //returnedText.setText(textFinal);
+        Log.i(LOG_TAG, "onPartialResults " +  text);
     }
 
     @Override
@@ -144,16 +244,23 @@ public class VoiceRecognitionActivity extends Activity implements
     @Override
     public void onResults(Bundle results) {
 
-        ArrayList<String> matches = results
+      /*  ArrayList<String> matches = results
                 .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
         String text = "";
 
+        //showing translation of word
         for (String result : matches)
             text += result + "\n";
 
 
-        Log.i(LOG_TAG, "onResults ");
-        returnedText.setText(text);
+         Log.i(LOG_TAG, "onResults " + textFinal + " "+ text);*/
+
+        while(!removeText.isEmpty())
+        {
+            set.remove(removeText.element().toString());
+            removeText.remove();
+        }
+
         toggleButton.setChecked(true);
     }
 
@@ -202,7 +309,6 @@ public class VoiceRecognitionActivity extends Activity implements
 
 
 
-
     private GestureDetector createGestureDetector(Context context) {
         //finalize context i guess??
         final Context c = context;
@@ -214,6 +320,7 @@ public class VoiceRecognitionActivity extends Activity implements
             public boolean onGesture(Gesture gesture) {
                 if (gesture == Gesture.TAP) {
                     // do something on tap
+                    toggleButton.toggle();
                     return true;
                 } else if (gesture == Gesture.TWO_TAP) {
                     // do something on two finger tap
@@ -257,5 +364,14 @@ public class VoiceRecognitionActivity extends Activity implements
         }
         return false;
     }
+    @Override
+    protected void onDestroy()
+    {
+        super.onDestroy();
+        speech.destroy();
 
+        serialization.<Dictionary>saveData_(Dictionary.getInstance(),filePath);
+        serialization.<CategoryDictionary>saveData_(CategoryDictionary.getInstance(), filePath1);
+
+    }
 }

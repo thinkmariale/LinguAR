@@ -28,23 +28,9 @@ public class DailyLessonQuota {
     //Serialized 14 Words
     public HashMap<String, Integer> wordsShown;
 
-    //Code for serialize and save
-    void saveAndSerialize() {
-
-    }
-
-    //Code for deserialize and load into wordsShown
-    void deserializeLoad()
-    {
-
-
-        System.out.println(wordsShown);
-    }
-
     public List<String> resolveDatesAndReturnWords()
     {
         List<String> englishWords =  new ArrayList<String>();
-        this.deserializeLoad();
         if (todaysDate.format(Calendar.getInstance().getTime()).equals(this.lastUsedReviewMode))
         {
             System.out.println("Pulling words from the same day");

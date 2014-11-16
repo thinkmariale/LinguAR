@@ -23,10 +23,7 @@ public class Dictionary implements Serializable {
 	// initializer 
 	{
 		dictionary = new HashMap<String, Word>();
-		/*
-		for(int i = 0; i < 26; i++){
-			dictionary.add(new HashMap<String,LookupVal>());
-		}*/
+
 		
 	}
 	
@@ -44,18 +41,18 @@ public class Dictionary implements Serializable {
 	public void LoadDictionary(InputStream inputStream) throws IOException{
 		
 		dictionary = new HashMap<String, Word>();
-		InputStreamReader is = new InputStreamReader(inputStream);
-		BufferedReader br = new BufferedReader(is);
-		
+	//	InputStreamReader is = new InputStreamReader(inputStream,"ISO-8859-1");
+		BufferedReader br = new BufferedReader(new InputStreamReader(inputStream,"ISO-8859-1"));
+
 		 Log.d("DIC", "in dic!");
 		
-		 String read          = br.readLine();
-		 while(read != null) {
-			 String[] wordlist = (read.split(","));
-			 dictionary.put(wordlist[0], new Word(wordlist[0],wordlist[1]) );
-			 read = br.readLine();
+		 String read = "";
+
+        while ((read=br.readLine())!=null){
+			 String[] wordList = (read.split(","));
+			 dictionary.put(wordList[0], new Word(wordList[0],wordList[1]) );
 		}
-		 	
+		 br.close();
 		 Log.d("DIC","dic length " + String.valueOf( dictionary.size() ));
 	}
 	
@@ -74,64 +71,19 @@ public class Dictionary implements Serializable {
 	{
 		if(dictionary.containsKey(w))
 		{
+            // if we are thinking on displaying it, it must have at least 2 categories
 			if(isDisplayed) {
-				dictionary.get(w).incrementCategoryCount();
+                if(dictionary.get(w).incrementCategoryCount())
+                    return dictionary.get(w);
 			}
-			return dictionary.get(w);
+			else
+                return dictionary.get(w);
 		}
 		
 		return null;
 	}
 
-	/*public LookupVal find(String w){
-		
-		int c = getIndex(w);
-		return dictionary.get(c).get(w);
-		
-	}
-	
-	
-	public Word addWord(String w, Word l){
-				
-		int c = getIndex(w);
-		
-		return dictionary.get(c).put(w, l);
-				
-	}*/
-	
-	public boolean updateWordTranslation(){
-		boolean result = false;
-		
-		return result;
-	}
-	
-	
-	/*public int fullUpdate(Dictionary d){
-		int numAdded = 0;
-		
-		for (int i = 0; i <26; i++){
-			if(dictionary.get(i).size() < d.dictionary.get(i).size()){
-				
-				// find and add all new elements
-			}
-			
-			
-		}
-		
-		
-		
-		return numAdded;
-	}*/
-	
-	public int getIndex(String w){
-		char c = w.charAt(0);
-		int pos = (int)c;
-		if(pos < 97){
-			c += 32;
-		}
-		c -= 97;
-		return c;
-	}
-	
+
+
 	
 }

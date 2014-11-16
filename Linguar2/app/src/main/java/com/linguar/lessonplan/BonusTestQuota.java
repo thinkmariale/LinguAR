@@ -1,5 +1,11 @@
 package com.linguar.lessonplan;
 
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import android.app.Activity;
+
+
+
 /**
  * Created by idealboy on 09/11/2014.
  */
@@ -11,14 +17,4 @@ public class BonusTestQuota {
         return instance;
     }
     public String lastTakenBonusTest;
-
-    private void serializeSave()
-    {
-
-    }
-
-    private void deserializeLoad()
-    {
-
-    }
 }

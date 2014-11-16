@@ -6,6 +6,50 @@ import com.linguar.dictionary.*;
 
 public class Serialization {
 
+
+    public <T> void saveData_(T tClass, String filePath)
+    {
+        FileOutputStream fileOut = null;
+        ObjectOutputStream out = null;
+        try
+        {
+            // tClass
+            fileOut = new FileOutputStream(filePath);
+            out   = new ObjectOutputStream(fileOut);
+            out.writeObject(tClass);
+            out.close();
+            fileOut.close();
+            System.out.printf("Serialized data is saved in dictionary.ser");
+        }catch(Exception i)
+        {
+            i.printStackTrace();
+        }
+    }
+
+
+    public <T> void loadData_(T tClass, String filePath)
+    {
+        FileOutputStream fileOut = null;
+        ObjectOutputStream out = null;
+        try
+        {
+            FileInputStream fileIn = new FileInputStream(filePath);
+            ObjectInputStream in = new ObjectInputStream(fileIn);
+            tClass = (T) in.readObject();
+            in.close();
+            fileIn.close();
+
+        }catch(IOException i)
+        {
+            i.printStackTrace();
+            return;
+        }catch(ClassNotFoundException c)
+        {
+            System.out.println("dictionary class not found");
+            c.printStackTrace();
+            return;
+        }
+    }
 	public void saveData(String filePath, String filePath1)
 	{
 		Dictionary dir         = Dictionary.getInstance();
@@ -51,6 +95,7 @@ public class Serialization {
 	         dir = (Dictionary) in.readObject();
 	         in.close();
 	         fileIn.close();
+
 	         // now load CategoryDictionary
 	         FileInputStream fileIn1 = new FileInputStream(filePath1);
 	         ObjectInputStream in1 = new ObjectInputStream(fileIn);

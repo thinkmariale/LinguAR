@@ -2,7 +2,6 @@ package com.linguar.lessonplan;
 
 import java.util.ArrayList;
 import java.util.List;
-import  com.linguar.dictionary.Word;
 
 /**
  * Created by Adarshkumar Pavani on 08/11/2014.
@@ -17,14 +16,4 @@ public class CumulativeWordsLearnt {
     }
 
     public List<String> wordsLearnt = new ArrayList<String>();
-
-    public void serializeSave()
-    {
-
-    }
-
-    private void deserializeLoad()
-    {
-
-    }
 }
