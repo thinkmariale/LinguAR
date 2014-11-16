@@ -2,16 +2,22 @@ package com.linguar;
 
 import android.app.Activity;
 import android.content.Context;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.location.LocationManager;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.util.List;
 
 
 public class GPSActivity extends Activity {
+
+    private static final String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +80,16 @@ public class GPSActivity extends Activity {
         double latitude = currentLocation.getLatitude();
         double longitude = currentLocation.getLongitude();
 
-        // Look up the location in Google Maps.
+        // Look up the location in Google Places
+        HttpURLConnection url = null;
+        StringBuilder jsonResults = new StringBuilder();
+
+        try {
+            StringBuilder sb = new StringBuilder(PLACES_API_BASE);
+            sb.append("?key=")
+        } catch (Exception e) {
+            // TODO
+        }
 
     }
 
