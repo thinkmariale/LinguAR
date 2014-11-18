@@ -174,6 +174,9 @@ public class MainActivity extends Activity {
                     return true;
                 } else if (gesture == Gesture.TWO_TAP) {
                     // do something on two finger tap
+                    // temporary- letting Mode 3 (Location) take over 2 tap
+                    Intent locationDetector = new Intent(c, GPSActivity.class);
+                    startActivity(locationDetector);
                     return true;
                 } else if (gesture == Gesture.SWIPE_RIGHT) {
                     // do something on right (forward) swipe
