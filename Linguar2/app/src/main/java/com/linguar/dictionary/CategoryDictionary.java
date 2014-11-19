@@ -14,14 +14,16 @@ public class CategoryDictionary implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private static CategoryDictionary instance = new CategoryDictionary();
-	
+
+    private static List<Category> DefaultCategories;
 	private static HashMap<Category, List<String> > category_dictionary;
 	
 	// initializer 
 		{
 			category_dictionary = new HashMap<Category, List<String> >();
-			
-		}
+            DefaultCategories = new ArrayList<Category>();
+        }
+
 	//get instance
 	/* Static 'instance' method */
 	public static CategoryDictionary getInstance( ) {
@@ -32,7 +34,16 @@ public class CategoryDictionary implements Serializable {
 	{
 		category_dictionary = c;
 	}
-	
+
+    public void setDefaultCategories(List<Category> c)
+    {
+        DefaultCategories = c;
+    }
+
+    public List<Category> getDefaultCategories()
+    {
+        return DefaultCategories;
+    }
 	public HashMap<Category, List<String> > getCatDictionary(){
 		return category_dictionary;
 	} 
@@ -59,20 +70,18 @@ public class CategoryDictionary implements Serializable {
 				add(new Category()); add(new Category()); }} ;
 				
 		for (Category key : category_dictionary.keySet()) {
-			int c = 0;
-			
-			while(c < top.size() )
-			{
-				if(key.counter > top.get(c).counter){
-					//getWordsFromCategory(key);
-					top.remove(c);
-					top.add(c,key);
-					//getWordsFromCategory(top.get(c));
-					break;
-				}
-				else c++;
-			}  
-		}
+            int c = 0;
+
+            while (c < top.size()) {
+                if (key.counter > top.get(c).counter) {
+                    //getWordsFromCategory(key);
+                    top.remove(c);
+                    top.add(c, key);
+                    //getWordsFro   mCategory(top.get(c));
+                    break;
+                } else c++;
+            }
+        }
 		
 		return top;
 		

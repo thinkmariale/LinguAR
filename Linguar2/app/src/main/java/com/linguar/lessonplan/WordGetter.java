@@ -20,7 +20,8 @@ public class WordGetter{
     private Dictionary _dictionary;
     private DailyLessonQuota _dQuota;
 
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddkkmmss");
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+    private SimpleDateFormat newsdgf = new SimpleDateFormat("yyyyMMddkkmmss");
     private long todaysDate;
     /**
 	 * Returns the list of 7 words from the list of Categories. The list is shuffled. These words have not been shown in the last 24 hours
@@ -30,10 +31,11 @@ public class WordGetter{
 	 */
 	public List<String> getWordsFromCategoryList(List<Category> categoryList) throws Exception
 	{
-		 _cDictionary =  CategoryDictionary.getInstance();
+		_cDictionary =  CategoryDictionary.getInstance();
         _dictionary = Dictionary.getInstance();
         _dQuota = DailyLessonQuota.getInstance();
-        todaysDate = Long.getLong(sdf.format(Calendar.getInstance().getTime()));
+        System.out.println(sdf.format(Calendar.getInstance().getTime()));
+        todaysDate = Long.valueOf(sdf.format(Calendar.getInstance().getTime()));
 		List<String> allCategoryWords =  new ArrayList<String>();
 		
 		if(categoryList.size() < 5)
@@ -63,9 +65,10 @@ public class WordGetter{
         for(String word : allCategoryWords)
         {
             String lastShown = wordDictionary.get(word).stats.lastShown;
-            if(lastShown!=null || lastShown !="")
+            if(!lastShown.equals("") || lastShown.length()!=0)
             {
-                if(todaysDate-Long.getLong(lastShown)>=1000000) //Differece of 24 hours
+                System.out.println("LastShown " + lastShown + " " + lastShown.length());
+                if(todaysDate-Long.valueOf(lastShown)>=1000000) //Differece of 24 hours
                     finalWordList.add(word);
             }
             else

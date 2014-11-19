@@ -18,6 +18,7 @@ import com.google.android.glass.widget.CardScrollView;
 import com.linguar.dictionary.CategoryDictionary;
 import com.linguar.dictionary.Dictionary;
 import com.linguar.dictionary.Word;
+import com.linguar.lessonplan.DisplayWordModeB;
 import com.linguar.lessonplan.LessonPlan;
 import com.linguar.lessonplan.ReviewMode;
 import com.linguar.serialization.Serialization;
@@ -42,7 +43,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
-
 public class LessonActivity extends Activity implements
         RecognitionListener {
 
@@ -53,17 +53,23 @@ public class LessonActivity extends Activity implements
     private TextView returnedText;
     private ToggleButton toggleButton;
 
-    private ReviewMode _reviewMode = new ReviewMode();
+    private ReviewMode _reviewMode;
     private SpeechRecognizer speech = null;
     private Intent recognizerIntent;
     private String LOG_TAG = "LessonActivity";
     private Serialization serialization;
     private String filePath;
 
+    private int curLesson;
+    private int numLessons = 3;
+    private String testMe;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        testMe = "";
+        curLesson = 0;
         mGestureDetector = createGestureDetector(this);
         serialization = new Serialization();
         lessonPlan = LessonPlan.getInstance();
@@ -85,15 +91,24 @@ public class LessonActivity extends Activity implements
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 10);
 
-/*
+        System.out.println("Adarsh is in lesson plan");
         try {
-            _reviewMode.startLessonPlan();
+            _reviewMode = new ReviewMode();
+            System.out.println("Lesson Plan Passed Yea");
+            if(curLesson == 0)
+                _reviewMode.startLessonPlan();
+            if(curLesson == 1)
+                _reviewMode.startLessonPlan();
+            if(curLesson == 2)
+                _reviewMode.startLessonPlan();
         }
         catch(Exception e)
         {
+            System.out.println("Lesson Plan Failed");
             e.printStackTrace();
         }
-        */
+
+
         toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             @Override
@@ -110,6 +125,49 @@ public class LessonActivity extends Activity implements
                 }
             }
         });
+
+        Thread t = new Thread() {
+
+            @Override
+            public void run() {
+                try {
+                    while (!isInterrupted()) {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                          // update TextView here!
+                           if(curLesson == 0)
+                           {
+                               String str = _reviewMode.getCurrentString();
+                               returnedText.setText(str);
+                           }
+                           if(curLesson == 1)
+                           {
+                              // ArrayList<String> str = _reviewMode.getCurrentString();
+                              // returnedText.setText(str[0]);
+                              // testMe = str[1];
+                               toggleButton.toggle();
+                           }
+                           if(curLesson == 2)
+                           {
+                               // ArrayList<String> str = _reviewMode.getCurrentString();
+                               // returnedText.setText(str[0]);
+                               // testMe = str[1];
+                               toggleButton.toggle();
+                           }
+
+
+                                toggleButton.toggle();
+                            }
+                        });
+                        Thread.sleep(7000);
+                    }
+                } catch (InterruptedException e) {
+                }
+            }
+        };
+
+        t.start();
     }
 
     @Override
@@ -203,10 +261,15 @@ public class LessonActivity extends Activity implements
 
         //TODO
         //texts is what the user said
-         Log.i(LOG_TAG, "onResults " + " "+ text);
-
-        returnedText.setText(text);
-
+       if(curLesson == 2 || curLesson == 3) {
+           Log.i(LOG_TAG, "onResults " + " " + text);
+           String answer = "Wrong answer is " + text;
+           if (text.contains(testMe))
+               answer = "CORRECT!!";
+           returnedText.setText(answer);
+       }
+       else
+           returnedText.setText(text);
        // toggleButton.setChecked(true);
     }
 

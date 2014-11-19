@@ -28,9 +28,17 @@ public class CategoryGetter {
 	 */
 	public List<Category> getTopFiveCategories() throws Exception{
 		_catDictionary= CategoryDictionary.getInstance();
-		topCategories =_catDictionary.getTopCategories();
-		System.out.println("Top Categories : "+ topCategories.get(0));
-		if(topCategories == null)
+        List<Category> newCategoryList =  new ArrayList<Category>();
+        newCategoryList =_catDictionary.getTopCategories();
+
+        for(Category cat : newCategoryList) {
+            if(!(cat.category == null || cat.category=="" || cat.category.isEmpty()))
+                topCategories.add(cat);
+        }
+
+        System.out.println("Category size list after removal is:" + topCategories.size());
+
+        if(topCategories == null || topCategories.size()==0)
 		{
 			//Load top 5 categories with the default categories
 			return topCategories=getDefaultCategories(5);
@@ -81,7 +89,6 @@ public class CategoryGetter {
 	{
 		_default = new DefaultCategories();
 		defaultCategories = _default.getAllDefaultCategories();
-		System.out.println("Default Category 1: "+defaultCategories.get(0));
 		//Shuffle the default categories to ensure they are random
 		Collections.shuffle(defaultCategories);
 		
@@ -108,10 +115,10 @@ public class CategoryGetter {
 	 */
 	public Category getNewCategory(List<Category> categories) throws Exception
 	{
-		if(defaultCategories==null)
+		if(defaultCategories==null || defaultCategories.size()==0)
 		defaultCategories = _default.getAllDefaultCategories();
 		
-		if(defaultCategories == null)
+		if(defaultCategories == null || defaultCategories.size()==0)
 		{
 			throw new Exception("The default category list is null");
 		}

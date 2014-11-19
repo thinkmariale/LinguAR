@@ -16,9 +16,16 @@ public class dictionary_populator {
 
 	/* class will populate the category dictionary */
 	private static HashMap<Category, List<String> > category_dictionary;
-	
+    public String []defaultCategories =  {"edible_fruit",
+            "automotive_vehicle",
+            "hold_back",
+            "herb",
+            "stringed_instrument",
+            "chromatic_color"};
 
-	public void createCategoryDic(InputStream file) throws Exception
+    public List<Category> DefaultCategories;
+
+    public void createCategoryDic(InputStream file) throws Exception
 	{
 		System.out.println("creating category dictionary");
 		//InputStreamReader is = new InputStreamReader(file);
@@ -38,8 +45,10 @@ public class dictionary_populator {
 		try {
 			JSONObject reader = new JSONObject(sb.toString() );
 			JSONArray a = reader.names();
-			category_dictionary = new HashMap<Category, List<String> > ();	
-			
+
+            category_dictionary = new HashMap<Category, List<String> > ();
+            DefaultCategories = new ArrayList<Category>();
+
 			for(int i = 0; i < a.length(); i++) {
 				JSONArray a1 = reader.getJSONArray(a.getString(i));
 				//System.out.println(a.getString(i));
@@ -51,7 +60,13 @@ public class dictionary_populator {
 					dic.setCategory(a1.getString(j), cat);
 					words.add(a1.getString(j));
 				}
-				
+
+                //populating default cat with required list
+                for(String s : defaultCategories )
+                {
+                    if(s.equals(a.getString(i)))
+                        DefaultCategories.add(cat);
+                }
 				category_dictionary.put(cat, words); 
 				//System.out.println("----");
 			}
@@ -66,6 +81,6 @@ public class dictionary_populator {
 		//setting categoryDictionary
 		CategoryDictionary cat = CategoryDictionary.getInstance();
 		cat.setCategoryDic(category_dictionary);
-
+        cat.setDefaultCategories(DefaultCategories);
 	}
 }
