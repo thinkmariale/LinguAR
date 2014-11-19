@@ -32,10 +32,10 @@ public class CategoryGetter {
         newCategoryList =_catDictionary.getTopCategories();
 
         for(Category cat : newCategoryList) {
-            if(!(cat.category == null || cat.category=="" || cat.category.isEmpty()))
+            if(!(cat.category == null || cat.category=="" || cat.category.isEmpty()) )
                 topCategories.add(cat);
         }
-
+//TODO DONT NEED THIS ANYMORE
         System.out.println("Category size list after removal is:" + topCategories.size());
 
         if(topCategories == null || topCategories.size()==0)

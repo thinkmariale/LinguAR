@@ -1,8 +1,16 @@
 package com.linguar.dictionary;
 
 
+import com.linguar.lessonplan.LessonPlan;
+
+import java.io.Serializable;
+
 public class LessonPlanStats {
-	
+	//private static LessonPlanStats instance = new LessonPlanStats();
+  //  public static LessonPlanStats getInstance()
+    //{
+     //   return instance;
+  //  }
 	public String word;
 	public int numCorrect;
 	public int numIncorrect;

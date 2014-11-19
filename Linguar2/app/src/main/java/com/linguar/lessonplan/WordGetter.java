@@ -1,5 +1,7 @@
 package com.linguar.lessonplan;
 
+import android.util.Log;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -13,7 +15,6 @@ import com.linguar.dictionary.*;
  *
  */
 public class WordGetter{
-	
 
 	public final int MAX_WORDS_IN_24_HOURS = 7;
 	private CategoryDictionary _cDictionary;
@@ -62,17 +63,22 @@ public class WordGetter{
 		List<String> finalWordList = new ArrayList<String>();
         HashMap<String, Word> wordDictionary = _dictionary.getDictionary();
 
-        for(String word : allCategoryWords)
-        {
-            String lastShown = wordDictionary.get(word).stats.lastShown;
-            if(!lastShown.equals("") || lastShown.length()!=0)
-            {
+        System.out.println("size " + _dictionary.getDictionary().size());
+
+        for(String word : allCategoryWords) {
+
+                if (_dictionary.getWord(word,false)== null){
+                    Log.d("WG", "paila");
+                    continue;
+                }
+
+               String lastShown = wordDictionary.get(word).stats.lastShown;
+
+            if (!lastShown.equals("") || lastShown.length() != 0) {
                 System.out.println("LastShown " + lastShown + " " + lastShown.length());
-                if(todaysDate-Long.valueOf(lastShown)>=1000000) //Differece of 24 hours
+                if (todaysDate - Long.valueOf(lastShown) >= 1000000) //Differece of 24 hours
                     finalWordList.add(word);
-            }
-            else
-            {
+            } else {
                 finalWordList.add(word);
             }
 

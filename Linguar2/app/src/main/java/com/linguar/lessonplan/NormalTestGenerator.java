@@ -26,7 +26,7 @@ public class NormalTestGenerator {
     public static NormalTestStates NTStates = NormalTestStates.clearScreen;
     private DisplayWordModeB _modeB =  new DisplayWordModeB();
     private CumulativeWordsLearnt _wLearnt = CumulativeWordsLearnt.getInstance();
-    private Dictionary _dictionary = new Dictionary();
+    private Dictionary _dictionary = Dictionary.getInstance();
     private ResponseListener _rListerner = new ResponseListener();
 
     private AlertMessage _alertMessage = new AlertMessage();
@@ -35,7 +35,7 @@ public class NormalTestGenerator {
     public final int WAIT_FOR_USER_REPEAT = 5000;
     public final int NO_OF_WORDS_PER_TEST = 10;
 
-    void startNormalTest() throws Exception
+    public void startNormalTest() throws Exception
     {
         List<String> wordsForTest = _wLearnt.wordsLearnt;
         HashMap<String, Word> wordDictionary = _dictionary.getDictionary();

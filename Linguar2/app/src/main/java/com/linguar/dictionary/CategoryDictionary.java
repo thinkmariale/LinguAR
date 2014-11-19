@@ -1,5 +1,7 @@
 package com.linguar.dictionary;
 
+import android.util.Log;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -68,7 +70,8 @@ public class CategoryDictionary implements Serializable {
 		List<Category> top = new ArrayList<Category>()
 				{{ add(new Category()); add(new Category()); add(new Category()); 
 				add(new Category()); add(new Category()); }} ;
-				
+
+        //poppulating from top cat
 		for (Category key : category_dictionary.keySet()) {
             int c = 0;
 
@@ -82,7 +85,28 @@ public class CategoryDictionary implements Serializable {
                 } else c++;
             }
         }
-		
+
+        //if some still null, add
+        int d = 0;
+        int c = 0;
+        List<Integer> intList = new ArrayList<Integer>();
+
+        for(Category cat: top)
+        {
+            if((cat.category == null || cat.category=="" || cat.category.isEmpty()) )
+            {
+               intList.add(c);
+            }
+            c++;
+        }
+        for(Integer i : intList)
+        {
+            top.remove(i);
+            top.add(i, DefaultCategories.get(d));
+            d++;
+        }
+
+
 		return top;
 		
 	}

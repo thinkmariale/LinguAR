@@ -75,7 +75,7 @@ public class VoiceRecognitionActivity extends Activity implements
         set        = new HashSet<String >();
 
         //---
-        Log.d(LOG_TAG, "creating VoiceRecognitionActivity");
+        Log.d(LOG_TAG, "creating VoiceRecognitionActivity " + dic.getDictionary().size());
         returnedText = (TextView) findViewById(R.id.textView1);
         progressBar  = (ProgressBar) findViewById(R.id.progressBar1);
         toggleButton = (ToggleButton) findViewById(R.id.toggleButton1);

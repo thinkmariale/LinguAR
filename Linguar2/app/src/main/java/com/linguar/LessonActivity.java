@@ -18,8 +18,10 @@ import com.google.android.glass.widget.CardScrollView;
 import com.linguar.dictionary.CategoryDictionary;
 import com.linguar.dictionary.Dictionary;
 import com.linguar.dictionary.Word;
+import com.linguar.lessonplan.BonusTestGenerator;
 import com.linguar.lessonplan.DisplayWordModeB;
 import com.linguar.lessonplan.LessonPlan;
+import com.linguar.lessonplan.NormalTestGenerator;
 import com.linguar.lessonplan.ReviewMode;
 import com.linguar.serialization.Serialization;
 
@@ -54,14 +56,19 @@ public class LessonActivity extends Activity implements
     private ToggleButton toggleButton;
 
     private ReviewMode _reviewMode;
+    private NormalTestGenerator _normalTest;
+    private BonusTestGenerator _bonusTest;
     private SpeechRecognizer speech = null;
     private Intent recognizerIntent;
     private String LOG_TAG = "LessonActivity";
     private Serialization serialization;
     private String filePath;
+    private String filePath1;
+    private String filePath2;
 
     private int curLesson;
     private int numLessons = 3;
+    private int tick;
     private String testMe;
 
     @Override
@@ -70,11 +77,18 @@ public class LessonActivity extends Activity implements
 
         testMe = "";
         curLesson = 0;
+        tick = 7000;
+        Dictionary d = Dictionary.getInstance();
+        System.out.println("Lesson Plan Passed Yeah " + d.getDictionary().size());
+
         mGestureDetector = createGestureDetector(this);
         serialization = new Serialization();
         lessonPlan = LessonPlan.getInstance();
 
-        filePath = getFilesDir().getPath().toString()  + "/LessonPlan.ser";
+        filePath  = getFilesDir().getPath().toString()  + "/LessonPlan.ser";
+        filePath1 = getFilesDir().getPath().toString() + "/dictionary.ser";
+        filePath2 = getFilesDir().getPath().toString() + "/cat_dictionary.ser";
+
         serialization.<LessonPlan>loadData_(lessonPlan,filePath);
 
         setContentView(R.layout.activity_lesson);
@@ -91,16 +105,18 @@ public class LessonActivity extends Activity implements
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 10);
 
-        System.out.println("Adarsh is in lesson plan");
+
         try {
+
+            System.out.println("Lesson Plan Passed Yeah " +d.getDictionary().size());
             _reviewMode = new ReviewMode();
-            System.out.println("Lesson Plan Passed Yea");
-            if(curLesson == 0)
-                _reviewMode.startLessonPlan();
-            if(curLesson == 1)
-                _reviewMode.startLessonPlan();
-            if(curLesson == 2)
-                _reviewMode.startLessonPlan();
+            _normalTest = new NormalTestGenerator();
+            _bonusTest = new BonusTestGenerator();
+            System.out.println("Lesson Plan Passed Yeah " +d.getDictionary().size());
+            //startLesson();
+           //  curLesson = 1;
+           // _normalTest.startNormalTest();
+            _reviewMode.startLessonPlan();
         }
         catch(Exception e)
         {
@@ -146,7 +162,7 @@ public class LessonActivity extends Activity implements
                               // ArrayList<String> str = _reviewMode.getCurrentString();
                               // returnedText.setText(str[0]);
                               // testMe = str[1];
-                               toggleButton.toggle();
+                               //toggleButton.toggle();
                            }
                            if(curLesson == 2)
                            {
@@ -157,10 +173,10 @@ public class LessonActivity extends Activity implements
                            }
 
 
-                                toggleButton.toggle();
+
                             }
                         });
-                        Thread.sleep(7000);
+                        Thread.sleep(tick);
                     }
                 } catch (InterruptedException e) {
                 }
@@ -170,6 +186,26 @@ public class LessonActivity extends Activity implements
         t.start();
     }
 
+    private void startLesson()
+    {
+        try {
+            if (curLesson == 0)
+                _reviewMode.startLessonPlan();
+
+            if (curLesson == 1) {
+                _normalTest.startNormalTest();
+                tick = 3000;
+            }
+            if (curLesson == 2) {
+                _bonusTest.startBonusTest();
+                tick = 3000;
+            }
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
+    }
     @Override
     public void onResume() {
         super.onResume();
@@ -179,6 +215,10 @@ public class LessonActivity extends Activity implements
     @Override
     protected void onPause() {
         super.onPause();
+
+        serialization.<Dictionary>saveData_(Dictionary.getInstance(),filePath1);
+        serialization.<CategoryDictionary>saveData_(CategoryDictionary.getInstance(), filePath2);
+
         serialization.<LessonPlan>saveData_(lessonPlan, filePath);
 
         if (speech != null) {
@@ -358,8 +398,11 @@ public class LessonActivity extends Activity implements
                     return true;
                 } else if (gesture == Gesture.SWIPE_LEFT) {
                     // do something on left (backwards) swipe
-                    Intent learning = new Intent(c, VoiceRecognitionActivity.class);
-                    startActivity(learning);
+
+                  //  curLesson = (curLesson + 1) % numLessons;
+                  // startLesson();
+                  //  Intent learning = new Intent(c, VoiceRecognitionActivity.class);
+                  //  startActivity(learning);
                     return true;
                 }
                 return false;
@@ -397,11 +440,9 @@ public class LessonActivity extends Activity implements
     {
         super.onDestroy();
         speech.destroy();
-        serialization.<LessonPlan>saveData_(lessonPlan, filePath);
-        String filePath1  = getFilesDir().getPath().toString() + "/dictionary.ser";
-        String filePath2 = getFilesDir().getPath().toString() + "/cat_dictionary.ser";
 
         serialization.<Dictionary>saveData_(Dictionary.getInstance(),filePath1);
         serialization.<CategoryDictionary>saveData_(CategoryDictionary.getInstance(), filePath2);
+        serialization.<LessonPlan>saveData_(lessonPlan, filePath);
     }
 }

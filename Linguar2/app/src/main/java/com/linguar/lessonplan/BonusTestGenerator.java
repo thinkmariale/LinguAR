@@ -32,7 +32,7 @@ public class BonusTestGenerator {
     private final int TOTAL_CLOCK_TIME = 60000;
     private final long BONUS_TEST_FREQUENCY = 1000000;
 
-    void startBonusTest()
+    public void startBonusTest()
     {
 
         List<String> wordsForTest = _wLearnt.wordsLearnt;

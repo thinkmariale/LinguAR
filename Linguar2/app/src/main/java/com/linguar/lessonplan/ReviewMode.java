@@ -1,5 +1,7 @@
 package com.linguar.lessonplan;
 
+import android.util.Log;
+
 import com.linguar.dictionary.Dictionary;
 import com.linguar.dictionary.Word;
 import com.linguar.dictionary.Category;
@@ -55,7 +57,8 @@ public class ReviewMode {
                 for (String englishWord : englishWords) {
                     if (dQuota.getShownWordHashMap(englishWord).get(englishWord) < dQuota.NO_OF_TIMES_PER_WORD) {
                         Word word = wordDictionary.get(englishWord);
-                        displayWords.add(word.englishWord+" : "+word.spanishTranslation);
+                        displayWords.add(word.englishWord + " : " + word.spanishTranslation);
+                        Log.d("RM", word.englishWord + " : " + word.spanishTranslation);
                         updateWordStats(word);
 
                         //Adding the words to the hashmap of learnt words and updating the score

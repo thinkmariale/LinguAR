@@ -23,8 +23,6 @@ public class Dictionary implements Serializable {
 	// initializer 
 	{
 		dictionary = new HashMap<String, Word>();
-
-		
 	}
 	
 	public Dictionary(){
