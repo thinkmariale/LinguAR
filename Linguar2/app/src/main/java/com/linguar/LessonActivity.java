@@ -183,13 +183,14 @@ public class LessonActivity extends Activity implements
                                                counter = 0;
                                            }
                                        }
+
                                    }
                                    else if(ts == NormalTestStates.showTranslation)
                                    {
                                        if(didTalk && !toggleButton.isChecked()) {
                                             testWord.setText("Try Again: " + testMe);
                                             returnedText.setText("");
-                                           didTalk = false;
+                                            didTalk = false;
                                        }
 
                                        if(isCorrect)
@@ -198,6 +199,14 @@ public class LessonActivity extends Activity implements
                                            if(counter >= 4) {
                                                isCorrect = false;
                                                toggleButton.toggle();
+                                               counter = 0;
+                                           }
+                                       }
+                                       else
+                                       {
+                                           //show "CORRCT" for some sec. then start lesson again
+                                           if(counter >= 4) {
+                                               didTalk = true;
                                                counter = 0;
                                            }
                                        }
@@ -230,6 +239,7 @@ public class LessonActivity extends Activity implements
                                        {
                                            didTalk = false;
                                            testWord.setText("Try Tomorrow");
+                                           returnedText.setText("");
                                        }
                                    }
                                    if(isCorrect)
@@ -351,8 +361,12 @@ public class LessonActivity extends Activity implements
    @Override
     public void onResults(Bundle results) {
 
-       if(testDone)
+       if(testDone){
+           testWord.setText("Try Tomorrow");
+           returnedText.setText("");
            return;
+       }
+
        String text = "";
       /* ArrayList<String> voiceResults = results.getStringArrayList("results_recognition");
        if (voiceResults == null) {
@@ -414,6 +428,7 @@ public class LessonActivity extends Activity implements
                    isCorrect = false;
                    if (ts == NormalTestStates.showEnglishWord) {
                        _skeeper.score -= 200;
+                       didTalk = false;
                        ts = NormalTestStates.showTranslation;
                    }
                    else if (ts == NormalTestStates.showTranslation) {
