@@ -35,7 +35,7 @@ public class CategoryGetter {
             if(!(cat.category == null || cat.category=="" || cat.category.isEmpty()) )
                 topCategories.add(cat);
         }
-//TODO DONT NEED THIS ANYMORE
+        //TODO DONT NEED THIS ANYMORE
         System.out.println("Category size list after removal is:" + topCategories.size());
 
         if(topCategories == null || topCategories.size()==0)
@@ -76,7 +76,6 @@ public class CategoryGetter {
 				return topFiveCategories;
 			}
 		}
-
 	}
 
 	/**
@@ -131,20 +130,13 @@ public class CategoryGetter {
 			else
 				count++;
 		}
-		
-		if(count==defaultCategories.size())
-		{
-			AlertMessage alert =  new AlertMessage();
-			alert.showAlertMessage("Youve gone through all the default categories of words. This is a contextual vocabulary learning app. Please use the passive mode for a while, to help the app learn more about your vocabulary. You may return back after you�ve done so");
-			
-			//TODO: Set states as end of mode as soon s this is encountered------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-		}
+
 		Category cat = new Category();
 		Random rand = new Random();
 		//Return a new category
 		while(!categories.contains(cat))
 		{
-		cat = defaultCategories.get(rand.nextInt(defaultCategories.size()));
+		    cat = defaultCategories.get(rand.nextInt(defaultCategories.size()));
 		}
 		
 		return cat;

@@ -19,7 +19,6 @@ public class ReviewMode {
     private CumulativeWordsLearnt wLearnt =  CumulativeWordsLearnt.getInstance();
 	private Dictionary _dictionary = Dictionary.getInstance();
     private ScoreKeeper _skeeper =  ScoreKeeper.getInstance();
-	//private DisplayWordModeA _displayModeA = new DisplayWordModeA();
 	private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddkkmmss");
 	//private final int WAIT_BETWEEN_2_WORDS = 7000; //in milliseconds
     private final int SCORE_FOR_LEARNING = 100;
@@ -27,9 +26,11 @@ public class ReviewMode {
     private List<String> englishWords;
     private List<String> displayWords;
 	//private int timesDisplayed = 0;
+    public boolean isDone = false;
 
 	public void startLessonPlan() throws Exception {
         this.displayWords = new ArrayList<String>();
+        isDone = false;
 
         //Get words from the daily lesson plan
         englishWords = dQuota.resolveDatesAndReturnWords();
@@ -87,10 +88,10 @@ public class ReviewMode {
     private void updateWordStats(Word word)
     {
         if(dQuota.getShownWordHashMap(word.englishWord).containsKey(word.englishWord)) // This is when the list of words are picked from the daily lesson plan. Incrementing the number of times the word has been shown that day
-        dQuota.putWordInWordsShown(word.englishWord, dQuota.getShownWordHashMap(word.englishWord).get(word.englishWord) + 1);
+            dQuota.putWordInWordsShown(word.englishWord, dQuota.getShownWordHashMap(word.englishWord).get(word.englishWord) + 1);
 
         else
-        dQuota.putWordInWordsShown(word.englishWord, 1); // This is when a fresh list of words is picked up instead of a saved daily lesson list. Since it's the first time, putting the count of times shown as 1
+            dQuota.putWordInWordsShown(word.englishWord, 1); // This is when a fresh list of words is picked up instead of a saved daily lesson list. Since it's the first time, putting the count of times shown as 1
 
         word.stats.timesShownSinceBeginnning+=1;
         word.stats.lastShown=sdf.format(Calendar.getInstance().getTime());
@@ -104,11 +105,15 @@ public class ReviewMode {
                 this.index++;
                 return displayText;
             }
-            else
+            else {
+                isDone = true;
                 return "You've finished the lesson plan for today. Please revisit tomorrow to learn more words.";
+            }
         }
-        else
+
+        isDone = true;
         return "You've finished the lesson plan for today. Please revisit tomorrow to learn more words.";
+
     }
 
 }

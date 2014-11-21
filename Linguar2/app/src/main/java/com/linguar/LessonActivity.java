@@ -9,40 +9,24 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.google.android.glass.media.Sounds;
 import com.google.android.glass.touchpad.Gesture;
 import com.google.android.glass.touchpad.GestureDetector;
-import com.google.android.glass.widget.CardBuilder;
-import com.google.android.glass.widget.CardScrollAdapter;
-import com.google.android.glass.widget.CardScrollView;
 import com.linguar.dictionary.CategoryDictionary;
 import com.linguar.dictionary.Dictionary;
-import com.linguar.dictionary.Word;
 import com.linguar.lessonplan.BonusTestGenerator;
-import com.linguar.lessonplan.DisplayWordModeB;
 import com.linguar.lessonplan.LessonPlan;
 import com.linguar.lessonplan.NormalTestGenerator;
 import com.linguar.lessonplan.ReviewMode;
+import com.linguar.lessonplan.ScoreKeeper;
 import com.linguar.serialization.Serialization;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioManager;
-import android.os.Bundle;
 import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.CompoundButton;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 public class LessonActivity extends Activity implements
@@ -65,19 +49,34 @@ public class LessonActivity extends Activity implements
     private String filePath;
     private String filePath1;
     private String filePath2;
+    private int counter = 0;
+
+    private ScoreKeeper _skeeper = ScoreKeeper.getInstance();
 
     private int curLesson;
     private int numLessons = 3;
-    private int tick;
+    private enum NormalTestStates {showEnglishWord, showTranslation, speakWord};
+    private enum BonusTestStates {showEnglishWord, answerWrong};
+
+    private NormalTestStates ts = NormalTestStates.showEnglishWord;
+    private BonusTestStates bs = BonusTestStates.showEnglishWord;
+    private Thread t = new Thread();
+    private boolean waitForTranslate = false;
+    private boolean waitForSpeech = false;
+    private int tick = 0;
+    private boolean didTalk = true;
+    private boolean isCorrect = false;
+    private boolean testDone  = false;
     private String testMe;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        testMe = "";
+        testMe    = "";
         curLesson = 0;
-        tick = 7000;
+        tick = 500;
+
         Dictionary d = Dictionary.getInstance();
         System.out.println("Lesson Plan Passed Yeah " + d.getDictionary().size());
 
@@ -96,24 +95,24 @@ public class LessonActivity extends Activity implements
         testWord     = (TextView) findViewById(R.id.textView2);
         returnedText = (TextView) findViewById(R.id.textView1);
         toggleButton = (ToggleButton) findViewById(R.id.toggleButton1);
+        testWord.setText("Review Mode!");
 
         speech = SpeechRecognizer.createSpeechRecognizer(this);
         speech.setRecognitionListener(this);
         recognizerIntent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "sp");
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "es-ES");
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "es-ES");
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, this.getPackageName());
         recognizerIntent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_WEB_SEARCH);
-        recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 10);
-
+        recognizerIntent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
 
         try {
 
-            System.out.println("Lesson Plan Passed Yeah " +d.getDictionary().size());
             _reviewMode = new ReviewMode();
             _normalTest = new NormalTestGenerator();
             _bonusTest = new BonusTestGenerator();
             System.out.println("Lesson Plan Passed Yeah " +d.getDictionary().size());
-            //startLesson();
+            startLesson();
            //  curLesson = 1;
            // _normalTest.startNormalTest();
             _reviewMode.startLessonPlan();
@@ -123,8 +122,6 @@ public class LessonActivity extends Activity implements
             System.out.println("Lesson Plan Failed");
             e.printStackTrace();
         }
-
-
         toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             @Override
@@ -142,7 +139,7 @@ public class LessonActivity extends Activity implements
             }
         });
 
-        Thread t = new Thread() {
+        t = new Thread() {
 
             @Override
             public void run() {
@@ -151,29 +148,102 @@ public class LessonActivity extends Activity implements
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                          // update TextView here!
-                           if(curLesson == 0)
-                           {
-                               String str = _reviewMode.getCurrentString();
-                               returnedText.setText(str);
-                           }
-                           if(curLesson == 1)
-                           {
-                              // ArrayList<String> str = _reviewMode.getCurrentString();
-                              // returnedText.setText(str[0]);
-                              // testMe = str[1];
-                               //toggleButton.toggle();
-                           }
-                           if(curLesson == 2)
-                           {
-                               // ArrayList<String> str = _reviewMode.getCurrentString();
-                               // returnedText.setText(str[0]);
-                               // testMe = str[1];
-                               toggleButton.toggle();
-                           }
+                              // update TextView here!
+                               if(curLesson == 0)
+                               {
+                                   if(_normalTest.isDone)
+                                       testDone = true;
+                                   String str = _reviewMode.getCurrentString();
+                                   testWord.setText(str);
+                               }
+                               if(curLesson == 1)
+                               {
+                                   if(_normalTest.isDone)
+                                       testDone = true;
+
+                                   if(ts == NormalTestStates.showEnglishWord) {
+
+                                       if(didTalk && toggleButton.isChecked()) {
+                                           if(!isCorrect) {
+                                               didTalk = false;
+                                               returnedText.setText("");
+                                               String str = _normalTest.getCurrentWord();
+                                               testWord.setText("Translate: " + str);
+
+                                               //Show the count down timer for 7 seconds //TODO UI
+                                               testMe = _normalTest.getCurrentTranslation(str);
+                                           }
+                                       }
+                                       if(isCorrect)
+                                       {
+                                           //show "CORRCT" for some sec. then start lesson again
+                                           if(counter >= 4) {
+                                               isCorrect = false;
+                                               toggleButton.toggle();
+                                               counter = 0;
+                                           }
+                                       }
+                                   }
+                                   else if(ts == NormalTestStates.showTranslation)
+                                   {
+                                       if(didTalk && !toggleButton.isChecked()) {
+                                            testWord.setText("Try Again: " + testMe);
+                                            returnedText.setText("");
+                                           didTalk = false;
+                                       }
+
+                                       if(isCorrect)
+                                       {
+                                           //show "CORRCT" for some sec. then start lesson again
+                                           if(counter >= 4) {
+                                               isCorrect = false;
+                                               toggleButton.toggle();
+                                               counter = 0;
+                                           }
+                                       }
+                                   }
+                                   else if(ts == NormalTestStates.speakWord)
+                                   {
+                                       if(didTalk && !toggleButton.isChecked()) {
+                                           testWord.setText("Please Repeat: " + testMe);
+                                           returnedText.setText("");
+                                           didTalk = false;
+                                       }
+                                       //TODO This text should be replaced by a speaker icon, whenever speech is being played
+                                   }
+                                   //increment counter to know in what part of the timer we are in
+                                   counter++;
+                               }
+                               if(curLesson == 2)
+                               {
+                                   if(_bonusTest.isDone)
+                                       testDone = true;
+
+                                   if(didTalk && toggleButton.isChecked()) {
+                                       if(!isCorrect && !_bonusTest.TryTomorrow()) {
+                                           didTalk = false;
+                                           String str = _bonusTest.getCurrentString();
+                                           testMe = _bonusTest.displayTranslation(str);
+                                           testWord.setText("Translate: " + str);
+                                       }
+                                       else if(!isCorrect)
+                                       {
+                                           didTalk = false;
+                                           testWord.setText("Try Tomorrow");
+                                       }
+                                   }
+                                   if(isCorrect)
+                                   {
+                                       //show "CORRCT" for some sec. then start lesson again
+                                       if(counter >= 4) {
+                                           isCorrect = false;
+                                           toggleButton.toggle();
+                                           counter = 0;
+                                       }
+                                   }
 
 
-
+                               }//end curLessons
                             }
                         });
                         Thread.sleep(tick);
@@ -189,16 +259,18 @@ public class LessonActivity extends Activity implements
     private void startLesson()
     {
         try {
+            testDone = false;
             if (curLesson == 0)
+                tick = 7000;
                 _reviewMode.startLessonPlan();
 
             if (curLesson == 1) {
+                tick = 500;
                 _normalTest.startNormalTest();
-                tick = 3000;
             }
             if (curLesson == 2) {
+                tick = 500;
                 _bonusTest.startBonusTest();
-                tick = 3000;
             }
         }
         catch (Exception e)
@@ -218,7 +290,6 @@ public class LessonActivity extends Activity implements
 
         serialization.<Dictionary>saveData_(Dictionary.getInstance(),filePath1);
         serialization.<CategoryDictionary>saveData_(CategoryDictionary.getInstance(), filePath2);
-
         serialization.<LessonPlan>saveData_(lessonPlan, filePath);
 
         if (speech != null) {
@@ -231,7 +302,6 @@ public class LessonActivity extends Activity implements
     @Override
     public void onBeginningOfSpeech() {
         Log.i(LOG_TAG, "onBeginningOfSpeech");
-
     }
 
     @Override
@@ -249,11 +319,18 @@ public class LessonActivity extends Activity implements
     public void onError(int errorCode) {
         String errorMessage = getErrorText(errorCode);
         Log.d(LOG_TAG, "FAILED " + errorMessage);
-        if(errorCode != SpeechRecognizer.ERROR_CLIENT) {
+        if(errorCode == SpeechRecognizer.ERROR_SPEECH_TIMEOUT)
+        {
+            //showing translation text if user didnt talk
+            toggleButton.setChecked(false);
+            returnedText.setText(testMe);
+            didTalk = true;
+        }
+        else if(errorCode != SpeechRecognizer.ERROR_CLIENT ) {
             returnedText.setText(errorMessage);
             toggleButton.setChecked(false);
         }
-        else toggleButton.setChecked(true);
+       //toggleButton.setChecked(false);
     }
 
     @Override
@@ -271,21 +348,19 @@ public class LessonActivity extends Activity implements
         Log.i(LOG_TAG, "onReadyForSpeech");
     }
 
-
    @Override
     public void onResults(Bundle results) {
 
+       if(testDone)
+           return;
        String text = "";
       /* ArrayList<String> voiceResults = results.getStringArrayList("results_recognition");
-
-
        if (voiceResults == null) {
            Log.e(LOG_TAG, "No voice results");
            ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
 
            for (String result : matches)
                text += result + "\n";
-
        } else {
            Log.d(LOG_TAG, "Printing matches: ");
            for (String match : voiceResults) {
@@ -295,22 +370,73 @@ public class LessonActivity extends Activity implements
        }*/
 
        ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-
-       for (String result : matches)
+       boolean pass = false;
+       testMe = testMe.trim();
+       for (String result : matches) {
+           result = result.toLowerCase().trim();
+           if(result.contentEquals(testMe) ||  result.contains(testMe) )
+               pass = true;
            text += result + "\n";
+       }
 
-        //TODO
+       counter = 0;
+       didTalk = true;
         //texts is what the user said
-       if(curLesson == 2 || curLesson == 3) {
+       if(curLesson == 1 || curLesson == 2) {
            Log.i(LOG_TAG, "onResults " + " " + text);
-           String answer = "Wrong answer is " + text;
-           if (text.contains(testMe))
+           String answer = text;
+           text = text.toLowerCase().trim();
+
+           if (pass) {
                answer = "CORRECT!!";
+               //Adding score for correct answer
+               if (curLesson == 1)
+               {
+                   if (ts == NormalTestStates.showEnglishWord)
+                       _skeeper.score += 500;
+                   else if (ts == NormalTestStates.showTranslation)
+                       _skeeper.score += 300;
+                   else if (ts == NormalTestStates.speakWord)
+                       _skeeper.score -= 100;
+
+                   ts = NormalTestStates.showEnglishWord;
+                   //start with next word
+                   isCorrect = true;
+               }
+               else if(curLesson == 2)
+                     _skeeper.score += 1000;
+           }
+           else //Wrong answer
+           {
+               if (curLesson == 1)
+               {
+                   testWord.setText("Wrong: " + testMe);
+                   isCorrect = false;
+                   if (ts == NormalTestStates.showEnglishWord) {
+                       _skeeper.score -= 200;
+                       ts = NormalTestStates.showTranslation;
+                   }
+                   else if (ts == NormalTestStates.showTranslation) {
+                       _skeeper.score -= 200;
+                       ts = NormalTestStates.speakWord;
+                   }
+                   else if (ts == NormalTestStates.speakWord) {
+                       _skeeper.score -= 300;
+                       ts = NormalTestStates.showEnglishWord;
+                   }
+               }
+               if(curLesson == 2)
+               {
+                   testWord.setText("Wrong: " + testMe);
+                   isCorrect = false;
+                   testDone  = true;
+                   _bonusTest.isDone = true;
+               }
+           }
            returnedText.setText(answer);
        }
        else
            returnedText.setText(text);
-       // toggleButton.setChecked(true);
     }
 
     @Override
@@ -355,7 +481,6 @@ public class LessonActivity extends Activity implements
         return message;
     }
 
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -399,8 +524,23 @@ public class LessonActivity extends Activity implements
                 } else if (gesture == Gesture.SWIPE_LEFT) {
                     // do something on left (backwards) swipe
 
-                  //  curLesson = (curLesson + 1) % numLessons;
-                  // startLesson();
+                    curLesson = (curLesson + 1) % numLessons;
+                    if(curLesson == 0)
+                    {
+                        returnedText.setText("");
+                        testWord.setText("Review Mode");
+                    }
+                    if(curLesson == 1)
+                    {
+                        returnedText.setText("");
+                        testWord.setText("Test Mode");
+                    }
+                    if(curLesson == 2)
+                    {
+                        returnedText.setText("");
+                        testWord.setText("Bonus Test Mode");
+                    }
+                   startLesson();
                   //  Intent learning = new Intent(c, VoiceRecognitionActivity.class);
                   //  startActivity(learning);
                     return true;
