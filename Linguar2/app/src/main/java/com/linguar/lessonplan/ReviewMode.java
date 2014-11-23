@@ -33,7 +33,7 @@ public class ReviewMode {
         isDone = false;
 
         //Get words from the daily lesson plan
-        englishWords = dQuota.resolveDatesAndReturnWords();
+        //englishWords = dQuota.resolveDatesAndReturnWords();
         System.out.println(englishWords);
 
         //If the lesson plan is opened on a new day or, if it is being used for the first time, the system will load 14 words from top 5 categories
@@ -56,7 +56,7 @@ public class ReviewMode {
             for(int i = 0; i<dQuota.NO_OF_TIMES_PER_WORD; i++) {
 
                 for (String englishWord : englishWords) {
-                    if (dQuota.getShownWordHashMap(englishWord).get(englishWord) < dQuota.NO_OF_TIMES_PER_WORD) {
+                   // if (dQuota.getShownWordHashMap(englishWord).get(englishWord) < dQuota.NO_OF_TIMES_PER_WORD) {
                         Word word = wordDictionary.get(englishWord);
                         displayWords.add(word.englishWord + " : " + word.spanishTranslation);
                         Log.d("RM", word.englishWord + " : " + word.spanishTranslation);
@@ -66,11 +66,7 @@ public class ReviewMode {
                         if(!wLearnt.wordsLearnt.contains(word.englishWord)) {
                             wLearnt.wordsLearnt.add(word.englishWord);
                             _skeeper.score += SCORE_FOR_LEARNING;
-                        }
-
-                      //  timesDisplayed++;
-                        //Wait for few seconds before showing the next word
-                        //Thread.sleep(WAIT_BETWEEN_2_WORDS);
+                     //   }
                     }
                 }
                 Collections.shuffle(englishWords); //Shuffle after every one round of words
@@ -93,9 +89,9 @@ public class ReviewMode {
         else
             dQuota.putWordInWordsShown(word.englishWord, 1); // This is when a fresh list of words is picked up instead of a saved daily lesson list. Since it's the first time, putting the count of times shown as 1
 
-        word.stats.timesShownSinceBeginnning+=1;
-        word.stats.lastShown=sdf.format(Calendar.getInstance().getTime());
-    }
+            word.stats.timesShownSinceBeginnning+=1;
+            word.stats.lastShown=sdf.format(Calendar.getInstance().getTime());
+        }
 
     public String getCurrentString()
     {

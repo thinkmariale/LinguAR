@@ -155,6 +155,7 @@ public class LessonActivity extends Activity implements
                                        testDone = true;
                                    String str = _reviewMode.getCurrentString();
                                    testWord.setText(str);
+                                   //TODO TTS: Repeat the word during review mode
                                }
                                if(curLesson == 1)
                                {
@@ -177,6 +178,7 @@ public class LessonActivity extends Activity implements
                                        if(isCorrect)
                                        {
                                            //show "CORRCT" for some sec. then start lesson again
+                                           //TODO Play a ding sound
                                            if(counter >= 4) {
                                                isCorrect = false;
                                                toggleButton.toggle();
@@ -196,6 +198,7 @@ public class LessonActivity extends Activity implements
                                        if(isCorrect)
                                        {
                                            //show "CORRCT" for some sec. then start lesson again
+                                           //TODO Play a ding sound
                                            if(counter >= 4) {
                                                isCorrect = false;
                                                toggleButton.toggle();
@@ -215,10 +218,12 @@ public class LessonActivity extends Activity implements
                                    {
                                        if(didTalk && !toggleButton.isChecked()) {
                                            testWord.setText("Please Repeat: " + testMe);
+                                           //TODO TTS: Repeat the word in Spanish
+                                           //TODO This text should be replaced by a speaker icon, whenever speech is being played
                                            returnedText.setText("");
                                            didTalk = false;
                                        }
-                                       //TODO This text should be replaced by a speaker icon, whenever speech is being played
+
                                    }
                                    //increment counter to know in what part of the timer we are in
                                    counter++;
@@ -235,7 +240,7 @@ public class LessonActivity extends Activity implements
                                            testMe = _bonusTest.displayTranslation(str);
                                            testWord.setText("Translate: " + str);
                                        }
-                                       else if(!isCorrect)
+                                       else if(!isCorrect)//TODO Check with maria if this should be TryTomorrow() or isCorrect
                                        {
                                            didTalk = false;
                                            testWord.setText("Try Tomorrow");
@@ -245,6 +250,7 @@ public class LessonActivity extends Activity implements
                                    if(isCorrect)
                                    {
                                        //show "CORRCT" for some sec. then start lesson again
+                                       //TODO Play Ding sound
                                        if(counter >= 4) {
                                            isCorrect = false;
                                            toggleButton.toggle();
@@ -422,6 +428,7 @@ public class LessonActivity extends Activity implements
            }
            else //Wrong answer
            {
+               //TODO Play wrong sound here
                if (curLesson == 1)
                {
                    testWord.setText("Wrong: " + testMe);
@@ -443,6 +450,7 @@ public class LessonActivity extends Activity implements
                if(curLesson == 2)
                {
                    testWord.setText("Wrong: " + testMe);
+                   //TODO Speak the word <testMe>
                    isCorrect = false;
                    testDone  = true;
                    _bonusTest.isDone = true;
