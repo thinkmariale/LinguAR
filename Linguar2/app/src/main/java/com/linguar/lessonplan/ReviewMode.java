@@ -83,11 +83,14 @@ public class ReviewMode {
 
     private void updateWordStats(Word word)
     {
-        if(dQuota.getShownWordHashMap(word.englishWord).containsKey(word.englishWord)) // This is when the list of words are picked from the daily lesson plan. Incrementing the number of times the word has been shown that day
-            dQuota.putWordInWordsShown(word.englishWord, dQuota.getShownWordHashMap(word.englishWord).get(word.englishWord) + 1);
+        if(dQuota.wordsShown == null)
+            dQuota.wordsShown = new HashMap<String, Integer>();
+
+        if(dQuota.wordsShown.containsKey(word.englishWord)) // This is when the list of words are picked from the daily lesson plan. Incrementing the number of times the word has been shown that day
+            dQuota.wordsShown.put(word.englishWord, dQuota.wordsShown.get(word.englishWord) + 1);
 
         else
-            dQuota.putWordInWordsShown(word.englishWord, 1); // This is when a fresh list of words is picked up instead of a saved daily lesson list. Since it's the first time, putting the count of times shown as 1
+            dQuota.wordsShown.put(word.englishWord, 1); // This is when a fresh list of words is picked up instead of a saved daily lesson list. Since it's the first time, putting the count of times shown as 1
 
             word.stats.timesShownSinceBeginnning+=1;
             word.stats.lastShown=sdf.format(Calendar.getInstance().getTime());

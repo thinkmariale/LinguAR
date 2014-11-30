@@ -1,14 +1,18 @@
 package com.linguar;
 
 import android.app.Activity;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.android.glass.app.Card;
+import com.google.android.glass.media.Sounds;
 import com.google.android.glass.touchpad.Gesture;
 import com.google.android.glass.touchpad.GestureDetector;
 import com.linguar.dictionary.CategoryDictionary;
@@ -23,19 +27,29 @@ import com.linguar.serialization.Serialization;
 import android.content.Context;
 import android.content.Intent;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class LessonActivity extends Activity implements
-        RecognitionListener {
+        RecognitionListener, TextToSpeech.OnInitListener {
+
+    //Text To Speech instance
+    private TextToSpeech repeatTTS;
+
+    //Spanish Locale
+    private Locale spa;
 
     private GestureDetector mGestureDetector;
     private LessonPlan lessonPlan;
 
-    private TextView testWord;
+    private TextView testWordA;
+    private TextView testWordB;
+    private TextView messageText;
     private TextView returnedText;
     private ToggleButton toggleButton;
 
@@ -69,9 +83,40 @@ public class LessonActivity extends Activity implements
     private boolean testDone  = false;
     private String testMe;
 
+    private boolean testStarted = false;
+    private boolean lessonStarted = true;
+    private boolean bonusStarted = false;
+    private boolean inTest = false;
+    private boolean didDing = false;
+    private Card testIntroCard;
+    private Card lessonIntroCard;
+    private Card bonusIntroCard;
+    private int currentCardIndex = 0;
+    private ArrayList<Card> menuCards = new ArrayList<Card>();
+    AudioManager am;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        repeatTTS = new TextToSpeech(this, this);
+        am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
+        //monster friend intro cards
+        lessonIntroCard = new Card(this);
+        lessonIntroCard.setImageLayout(Card.ImageLayout.FULL);
+        lessonIntroCard.addImage(R.drawable.review_start);
+        menuCards.add(lessonIntroCard);
+
+        testIntroCard = new Card(this);
+        testIntroCard.setImageLayout(Card.ImageLayout.FULL);
+        testIntroCard.addImage(R.drawable.test_start);
+        menuCards.add(testIntroCard);
+
+        bonusIntroCard = new Card(this);
+        bonusIntroCard.setImageLayout(Card.ImageLayout.FULL);
+        bonusIntroCard.addImage(R.drawable.bonus_start);
+        menuCards.add(bonusIntroCard);
 
         testMe    = "";
         curLesson = 0;
@@ -92,10 +137,14 @@ public class LessonActivity extends Activity implements
 
         setContentView(R.layout.activity_lesson);
 
-        testWord     = (TextView) findViewById(R.id.textView2);
-        returnedText = (TextView) findViewById(R.id.textView1);
+        testWordA = (TextView) findViewById(R.id.textViewA);
+        testWordB = (TextView) findViewById(R.id.textViewB);
+        messageText = (TextView) findViewById(R.id.messageView);
+        returnedText = (TextView) findViewById(R.id.textView3);
         toggleButton = (ToggleButton) findViewById(R.id.toggleButton1);
-        testWord.setText("Review Mode!");
+
+        //testWordA.setText("Review Mode!");
+        //testWordB.setText(" ");
 
         speech = SpeechRecognizer.createSpeechRecognizer(this);
         speech.setRecognitionListener(this);
@@ -112,33 +161,47 @@ public class LessonActivity extends Activity implements
             _normalTest = new NormalTestGenerator();
             _bonusTest = new BonusTestGenerator();
             System.out.println("Lesson Plan Passed Yeah " +d.getDictionary().size());
-            startLesson();
+           //startLesson();
            //  curLesson = 1;
            // _normalTest.startNormalTest();
-            _reviewMode.startLessonPlan();
+            //_reviewMode.startLessonPlan();
         }
         catch(Exception e)
         {
             System.out.println("Lesson Plan Failed");
             e.printStackTrace();
         }
+
+        setContentView(lessonIntroCard.getView());
+    }
+
+    private void attachToggle(int view){
+        setContentView(view);
+        testWordA = (TextView) findViewById(R.id.textViewA);
+        testWordB = (TextView) findViewById(R.id.textViewB);
+        returnedText = (TextView) findViewById(R.id.textView3);
+        toggleButton = (ToggleButton) findViewById(R.id.toggleButton1);
         toggleButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
 
             @Override
             public void onCheckedChanged(CompoundButton buttonView,
                                          boolean isChecked) {
                 if (isChecked) {
-                   // progressBar.setVisibility(View.VISIBLE);
+                    // progressBar.setVisibility(View.VISIBLE);
                     //progressBar.setIndeterminate(true);
                     speech.startListening(recognizerIntent);
+                    System.out.println("listening");
                 } else {
                     //progressBar.setIndeterminate(false);
                     //progressBar.setVisibility(View.INVISIBLE);
                     speech.stopListening();
+                    System.out.println("not listening");
                 }
             }
         });
+    }
 
+    private void startThread(){
         t = new Thread() {
 
             @Override
@@ -148,118 +211,155 @@ public class LessonActivity extends Activity implements
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                              // update TextView here!
-                               if(curLesson == 0)
-                               {
-                                   if(_normalTest.isDone)
-                                       testDone = true;
-                                   String str = _reviewMode.getCurrentString();
-                                   testWord.setText(str);
-                                   //TODO TTS: Repeat the word during review mode
-                               }
-                               if(curLesson == 1)
-                               {
-                                   if(_normalTest.isDone)
-                                       testDone = true;
+                                // update TextView here!
+                                if(curLesson == 0)
+                                {
+                                    String str = _reviewMode.getCurrentString();
+                                    if(!_reviewMode.isDone) {
+                                        String[] tmp = str.split(" ");
+                                        testWordA.setText(tmp[0]);
+                                        testWordB.setText(tmp[2]);
+                                        //TODO TTS: Repeat the word during review mode
+                                        repeatTTS.speak((testWordB.getText()).toString(), TextToSpeech.QUEUE_FLUSH, null);
+                                    }
+                                    else{
+                                        //set view to new layout card
+                                        setContentView(R.layout.message_layout);
+                                        messageText = (TextView) findViewById(R.id.messageView);
+                                        messageText.setText(str);
+                                    }
+                                }
+                                if(curLesson == 1)
+                                {
+                                    if(_normalTest.isDone)
+                                        testDone = true;
+                                    if(ts == NormalTestStates.showEnglishWord) {
+                                        if(didTalk && toggleButton.isChecked()) {
+                                            if(!isCorrect) {
+                                                didTalk = false;
+                                                String str = _normalTest.getCurrentWord();
+                                                if(!_normalTest.isDone) {
+                                                    returnedText.setText("");
+                                                    testWordA.setText("Translate: " + str);
+                                                    System.out.println("gets here!!!!!!!!!!!!!!!!!!!!!!!!!");
+                                                    //Show the count down timer for 7 seconds
+                                                    testMe = _normalTest.getCurrentTranslation(str);
+                                                }
+                                                else{
+                                                    //set view to new layout card
+                                                    setContentView(R.layout.message_layout);
+                                                    messageText = (TextView) findViewById(R.id.messageView);
+                                                    messageText.setText(str);
 
-                                   if(ts == NormalTestStates.showEnglishWord) {
+                                                }
+                                            }
+                                        }
+                                        if(isCorrect)
+                                        {
+                                            //show "CORRECT" for some sec. then start lesson again
+                                            //TODO Play a ding sound
+                                            System.out.println("Correct2");
+                                            if(!didDing) {
+                                                am.playSoundEffect(Sounds.SUCCESS);
+                                                didDing = true;
+                                            }
+                                            if(counter >= 4) {
+                                                isCorrect = false;
+                                                toggleButton.toggle();
+                                                counter = 0;
+                                                didDing = false;
+                                            }
+                                        }
 
-                                       if(didTalk && toggleButton.isChecked()) {
-                                           if(!isCorrect) {
-                                               didTalk = false;
-                                               returnedText.setText("");
-                                               String str = _normalTest.getCurrentWord();
-                                               testWord.setText("Translate: " + str);
+                                    }
+                                    else if(ts == NormalTestStates.showTranslation)
+                                    {
+                                            if(!_normalTest.isDone) {
+                                                testWordA.setText("Try Again: " + testMe);
+                                                returnedText.setText("");
+                                                didTalk = false;
+                                        }
 
-                                               //Show the count down timer for 7 seconds //TODO UI
-                                               testMe = _normalTest.getCurrentTranslation(str);
-                                           }
-                                       }
-                                       if(isCorrect)
-                                       {
-                                           //show "CORRCT" for some sec. then start lesson again
-                                           //TODO Play a ding sound
-                                           if(counter >= 4) {
-                                               isCorrect = false;
-                                               toggleButton.toggle();
-                                               counter = 0;
-                                           }
-                                       }
-
-                                   }
-                                   else if(ts == NormalTestStates.showTranslation)
-                                   {
-                                       if(didTalk && !toggleButton.isChecked()) {
-                                            testWord.setText("Try Again: " + testMe);
+                                        if(isCorrect)
+                                        {
+                                            //show "CORRECT" for some sec. then start lesson again
+                                            //TODO Play a ding sound
+                                            System.out.println("Correct3");
+                                            if(!didDing) {
+                                                am.playSoundEffect(Sounds.SUCCESS);
+                                                didDing = true;
+                                            }
+                                            if(counter >= 4) {
+                                                isCorrect = false;
+                                                toggleButton.toggle();
+                                                counter = 0;
+                                                didDing = false;
+                                            }
+                                        }
+                                        else
+                                        {
+                                            //show "CORRECT" for some sec. then start lesson again
+                                            if(counter >= 4) {
+                                                didTalk = true;
+                                                counter = 0;
+                                                didDing = false;
+                                            }
+                                        }
+                                    }
+                                    else if(ts == NormalTestStates.speakWord)
+                                    {
+                                        if(didTalk && !toggleButton.isChecked()) {
+                                            testWordA.setText("Please Repeat: " + testMe);
+                                            //TODO TTS: Repeat the word in Spanish
+                                            repeatTTS.speak(testMe.toString(), TextToSpeech.QUEUE_FLUSH, null);
+                                            //TODO This text should be replaced by a speaker icon, whenever speech is being played
                                             returnedText.setText("");
                                             didTalk = false;
-                                       }
+                                        }
+                                    }
+                                    //increment counter to know in what part of the timer we are in
+                                    counter++;
+                                }
+                                if(curLesson == 2)
+                                {
+                                    if(_bonusTest.isDone)
+                                        testDone = true;
 
-                                       if(isCorrect)
-                                       {
-                                           //show "CORRCT" for some sec. then start lesson again
-                                           //TODO Play a ding sound
-                                           if(counter >= 4) {
-                                               isCorrect = false;
-                                               toggleButton.toggle();
-                                               counter = 0;
-                                           }
-                                       }
-                                       else
-                                       {
-                                           //show "CORRCT" for some sec. then start lesson again
-                                           if(counter >= 4) {
-                                               didTalk = true;
-                                               counter = 0;
-                                           }
-                                       }
-                                   }
-                                   else if(ts == NormalTestStates.speakWord)
-                                   {
-                                       if(didTalk && !toggleButton.isChecked()) {
-                                           testWord.setText("Please Repeat: " + testMe);
-                                           //TODO TTS: Repeat the word in Spanish
-                                           //TODO This text should be replaced by a speaker icon, whenever speech is being played
-                                           returnedText.setText("");
-                                           didTalk = false;
-                                       }
-
-                                   }
-                                   //increment counter to know in what part of the timer we are in
-                                   counter++;
-                               }
-                               if(curLesson == 2)
-                               {
-                                   if(_bonusTest.isDone)
-                                       testDone = true;
-
-                                   if(didTalk && toggleButton.isChecked()) {
-                                       if(!isCorrect && !_bonusTest.TryTomorrow()) {
-                                           didTalk = false;
-                                           String str = _bonusTest.getCurrentString();
-                                           testMe = _bonusTest.displayTranslation(str);
-                                           testWord.setText("Translate: " + str);
-                                       }
-                                       else if(!isCorrect)//TODO Check with maria if this should be TryTomorrow() or isCorrect
-                                       {
-                                           didTalk = false;
-                                           testWord.setText("Try Tomorrow");
-                                           returnedText.setText("");
-                                       }
-                                   }
-                                   if(isCorrect)
-                                   {
-                                       //show "CORRCT" for some sec. then start lesson again
-                                       //TODO Play Ding sound
-                                       if(counter >= 4) {
-                                           isCorrect = false;
-                                           toggleButton.toggle();
-                                           counter = 0;
-                                       }
-                                   }
-
-
-                               }//end curLessons
+                                    if(didTalk && toggleButton.isChecked()) {
+                                        if(!isCorrect && !_bonusTest.TryTomorrow()) {
+                                            didTalk = false;
+                                            String str = _bonusTest.getCurrentString();
+                                            testMe = _bonusTest.displayTranslation(str);
+                                            testWordA.setText("Translate: " + str);
+                                        }
+                                        else if(!isCorrect)//TODO Check with maria if this should be TryTomorrow() or isCorrect
+                                        {
+                                            didTalk = false;
+                                            //testWordA.setText("Try Tomorrow");
+                                            //returnedText.setText("");
+                                            //set view to new layout card
+                                            setContentView(R.layout.message_layout);
+                                            messageText = (TextView) findViewById(R.id.messageView);
+                                            messageText.setText("Try Again Tomorrow");
+                                        }
+                                    }
+                                    if(isCorrect)
+                                    {
+                                        //show "CORRECT" for some sec. then start lesson again
+                                        //TODO Play Ding sound
+                                        System.out.println("Correct1");
+                                        if(!didDing) {
+                                            am.playSoundEffect(Sounds.SUCCESS);
+                                            didDing = true;
+                                        }
+                                        if(counter >= 4) {
+                                            isCorrect = false;
+                                            toggleButton.toggle();
+                                            counter = 0;
+                                            didDing = false;
+                                        }
+                                    }
+                                }//end curLessons
                             }
                         });
                         Thread.sleep(tick);
@@ -270,6 +370,7 @@ public class LessonActivity extends Activity implements
         };
 
         t.start();
+
     }
 
     private void startLesson()
@@ -281,11 +382,11 @@ public class LessonActivity extends Activity implements
                 _reviewMode.startLessonPlan();
 
             if (curLesson == 1) {
-                tick = 500;
+                tick = 50;
                 _normalTest.startNormalTest();
             }
             if (curLesson == 2) {
-                tick = 500;
+                tick = 50;
                 _bonusTest.startBonusTest();
             }
         }
@@ -368,8 +469,12 @@ public class LessonActivity extends Activity implements
     public void onResults(Bundle results) {
 
        if(testDone){
-           testWord.setText("Try Tomorrow");
-           returnedText.setText("");
+           //set view to new layout card
+           setContentView(R.layout.message_layout);
+           messageText = (TextView) findViewById(R.id.messageView);
+           messageText.setText("Try Tomorrow");
+           //testWordA.setText("Try Tomorrow");
+           //returnedText.setText("");
            return;
        }
 
@@ -429,9 +534,10 @@ public class LessonActivity extends Activity implements
            else //Wrong answer
            {
                //TODO Play wrong sound here
+               am.playSoundEffect(Sounds.DISALLOWED);
                if (curLesson == 1)
                {
-                   testWord.setText("Wrong: " + testMe);
+                   testWordA.setText("Wrong: " + testMe);
                    isCorrect = false;
                    if (ts == NormalTestStates.showEnglishWord) {
                        _skeeper.score -= 200;
@@ -449,8 +555,9 @@ public class LessonActivity extends Activity implements
                }
                if(curLesson == 2)
                {
-                   testWord.setText("Wrong: " + testMe);
+                   testWordA.setText("Wrong: " + testMe);
                    //TODO Speak the word <testMe>
+                   repeatTTS.speak(testMe.toString(), TextToSpeech.QUEUE_FLUSH, null);
                    isCorrect = false;
                    testDone  = true;
                    _bonusTest.isDone = true;
@@ -522,6 +629,7 @@ public class LessonActivity extends Activity implements
         }
         return super.onOptionsItemSelected(item);
     }
+
     private GestureDetector createGestureDetector(Context context) {
         //finalize context i guess??
         final Context c = context;
@@ -533,39 +641,54 @@ public class LessonActivity extends Activity implements
             public boolean onGesture(Gesture gesture) {
                 if (gesture == Gesture.TAP) {
                     // do something on tap
-                    toggleButton.toggle();
+                    am.playSoundEffect(Sounds.TAP);
+                    if(inTest) {
+                        toggleButton.toggle();
+                    }
+                    else {
+                        if (currentCardIndex == 0) {
+                            curLesson = 0;
+                            //start review
+                            attachToggle(R.layout.activity_lesson);
+                        } else if (currentCardIndex == 1) {
+                            curLesson = 1;
+                            //start test
+                            attachToggle(R.layout.activity_test);
+                            toggleButton.toggle();
+                            inTest = true;
+                        }
+                        /*else if (currentCardIndex == 2) {
+                            curLesson = 2;
+                            //start bonus
+                            attachToggle(R.layout.activity_test);
+                            toggleButton.toggle();
+                            inTest = true;
+                        }*/
+                        startLesson();
+                        startThread();
+                    }
+
                     return true;
                 } else if (gesture == Gesture.TWO_TAP) {
                     // do something on two finger tap
                     return true;
                 } else if (gesture == Gesture.SWIPE_RIGHT) {
                     // do something on right (forward) swipe
-                    // Intent listening = new Intent(c, ListenerActivity.class);
-                    Intent listening = new Intent(c, MainActivity.class);
-                    startActivity(listening);
+                    am.playSoundEffect(Sounds.SELECTED);
+                    inTest = false;
+                    if(currentCardIndex < 1) {
+                        currentCardIndex++;
+                        setContentView(menuCards.get(currentCardIndex).getView());
+                    }
                     return true;
                 } else if (gesture == Gesture.SWIPE_LEFT) {
+                    am.playSoundEffect(Sounds.SELECTED);
                     // do something on left (backwards) swipe
-
-                    curLesson = (curLesson + 1) % numLessons;
-                    if(curLesson == 0)
-                    {
-                        returnedText.setText("");
-                        testWord.setText("Review Mode");
+                    inTest = false;
+                    if(currentCardIndex > 0) {
+                        currentCardIndex--;
+                        setContentView(menuCards.get(currentCardIndex).getView());
                     }
-                    if(curLesson == 1)
-                    {
-                        returnedText.setText("");
-                        testWord.setText("Test Mode");
-                    }
-                    if(curLesson == 2)
-                    {
-                        returnedText.setText("");
-                        testWord.setText("Bonus Test Mode");
-                    }
-                   startLesson();
-                  //  Intent learning = new Intent(c, VoiceRecognitionActivity.class);
-                  //  startActivity(learning);
                     return true;
                 }
                 return false;
@@ -592,20 +715,61 @@ public class LessonActivity extends Activity implements
      */
     @Override
     public boolean onGenericMotionEvent(MotionEvent event) {
-        if (mGestureDetector != null) {
-            return mGestureDetector.onMotionEvent(event);
+        /*
+        //open up the general menu
+        if(testStarted) {
+            setContentView(testIntroCard.getView());
+            testStarted = false;
+            return true;
         }
-        return false;
+        else if(lessonStarted) {
+            setContentView(lessonIntroCard.getView());
+            lessonStarted = false;
+            return true;
+        }
+        else if(bonusStarted) {
+            setContentView(bonusIntroCard.getView());
+            bonusStarted = false;
+            return true;
+        }
+        */
+        //else{
+            if (mGestureDetector != null) {
+                return mGestureDetector.onMotionEvent(event);
+            }
+            return false;
+        //}
     }
 
     @Override
     protected void onDestroy()
     {
+        repeatTTS.stop();
+        repeatTTS.shutdown();
+        _reviewMode.isDone = true;
+        _normalTest.isDone = true;
+        _bonusTest.isDone = true;
+
         super.onDestroy();
+        speech.stopListening();
         speech.destroy();
 
         serialization.<Dictionary>saveData_(Dictionary.getInstance(),filePath1);
         serialization.<CategoryDictionary>saveData_(CategoryDictionary.getInstance(), filePath2);
         serialization.<LessonPlan>saveData_(lessonPlan, filePath);
+
+        inTest = false;
+
+        finish();
+    }
+
+    /**
+     * onInit fires when TTS initializes
+     */
+    public void onInit(int initStatus) {
+        //if successful, set locale
+        if (initStatus == TextToSpeech.SUCCESS)
+            spa = new Locale("es", "ES");
+        repeatTTS.setLanguage(spa);
     }
 }

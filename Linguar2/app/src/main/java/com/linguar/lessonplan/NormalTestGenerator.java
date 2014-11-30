@@ -61,6 +61,7 @@ public class NormalTestGenerator {
         }
 
         Collections.shuffle(subsetWords);
+        System.out.println("The list of words for the normal test are: " + subsetWords);
 
         for(String word : subsetWords)
         {

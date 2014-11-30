@@ -23,8 +23,8 @@ public class DailyLessonQuota implements Serializable {
     public  final int NO_OF_TIMES_PER_WORD = 3;
 
     //Serialized 14 Words
-    private HashMap<String, Integer> wordsShown =new HashMap<String, Integer>();;
-
+    public HashMap<String, Integer> wordsShown;
+/*
     public HashMap<String, Integer> getShownWordHashMap(String word)
     {
        if(this.wordsShown.containsKey(word)) {
@@ -75,5 +75,5 @@ public class DailyLessonQuota implements Serializable {
 
         return englishWords;
     }
-
+*/
 }
