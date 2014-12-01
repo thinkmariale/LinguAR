@@ -19,7 +19,7 @@ public class dictionary_populator {
     public String []defaultCategories =  {"edible_fruit",
             "automotive_vehicle",
             "hold_back",
-            "herb",
+            "persons",
             "stringed_instrument",
             "chromatic_color"};
 
@@ -57,8 +57,10 @@ public class dictionary_populator {
 				List<String> words = new ArrayList<String> ();
 				for(int j = 0; j < a1.length(); j++) {
 					//System.out.println(a1.getString(j));
-					dic.setCategory(a1.getString(j), cat);
-					words.add(a1.getString(j));
+					if(dic.setCategory(a1.getString(j), cat)) {
+                        words.add(a1.getString(j));
+                       // System.out.println("in " + a1.getString(j));
+                    }
 				}
 
                 //populating default cat with required list

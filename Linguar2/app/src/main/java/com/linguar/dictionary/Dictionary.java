@@ -59,9 +59,13 @@ public class Dictionary implements Serializable {
 		return dictionary;
 	} 
 	
-	public void setCategory(String word, Category cat)
+	public boolean setCategory(String word, Category cat)
 	{
-		dictionary.get(word).categoryList.add(cat);
+        if(dictionary.containsKey(word)) {
+            dictionary.get(word).categoryList.add(cat);
+            return true;
+        }
+        return false;
 	}
 	
 	//Function to get word and if its being shown, increment category count

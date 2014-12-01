@@ -59,6 +59,7 @@ public class VoiceRecognitionActivity extends Activity implements
     private String LOG_TAG = "VoiceRecognitionActivity";
 
     private Dictionary dic = Dictionary.getInstance();
+    private Thread t = new Thread();
 
     private Serialization serialization;
     private String filePath;
@@ -66,8 +67,10 @@ public class VoiceRecognitionActivity extends Activity implements
 
     private Queue mainText;
     private Queue removeText;
+    private boolean isShowing;
+    private long tick;
     private Set<String> set;
-    private String[] filterWords = {"a","about","after","all","also","an","and","any","as",
+    private String[] filterWords = {"a","about","after","all","also","an","am","and","any","as",
                         "at","back","be","because","but","by","can","come","could",
                         "day","do","even","first","for","from","get","give","go","good",
                         "have","he","her","him","his","how","I","if","in","into","it","its",
@@ -96,7 +99,8 @@ public class VoiceRecognitionActivity extends Activity implements
         mainText   = new LinkedList();
         removeText = new LinkedList();
         set        = new HashSet<String >();
-
+        isShowing = false;
+        tick = 500;
         //---
         Log.d(LOG_TAG, "creating VoiceRecognitionActivity " + dic.getDictionary().size());
         returnedTextA = (TextView) findViewById(R.id.textView1);
@@ -132,19 +136,20 @@ public class VoiceRecognitionActivity extends Activity implements
         });
 
 
-
-        Thread t = new Thread() {
+         t = new Thread() {
 
             @Override
             public void run() {
                 try {
                     while (!isInterrupted()) {
-                        Thread.sleep(800);
+                        Thread.sleep(tick);
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
                                 // update TextView here!
                                 if (!mainText.isEmpty()) {
+                                    tick = 2000;
+                                    isShowing = !isShowing;
                                     String str = mainText.element().toString();
                                     // System.out.println("Hello World! " + str);
                                     String[] tempStrings = str.split(" ");
@@ -153,6 +158,13 @@ public class VoiceRecognitionActivity extends Activity implements
                                     mainText.remove();
                                     removeText.add(str);
                                 }
+                                else {
+                                    isShowing = false;
+                                    returnedTextA.setText("");
+                                    returnedTextB.setText("");
+                                }
+
+                                Log.d("TIMER",  String.valueOf(isShowing));
                             }
                         });
 
@@ -167,10 +179,7 @@ public class VoiceRecognitionActivity extends Activity implements
     }
 
 
-
-
     // And From your main() method or any other method
-
     @Override
     public void onResume() {
         super.onResume();
@@ -188,7 +197,6 @@ public class VoiceRecognitionActivity extends Activity implements
             toggleButton.setChecked(false);
             Log.i(LOG_TAG, "destroy");
         }
-
     }
 
     @Override
@@ -251,16 +259,20 @@ public class VoiceRecognitionActivity extends Activity implements
             {
                 if(!isFilterWord(tempWord.englishWord))
                 {
-
                     String t = tempWord.englishWord + " ---- " + tempWord.spanishTranslation + "\n";
-                    if (set.add(t)) {
+
+                    boolean dontAdd = isShowing;
+                    if(mainText.size() < 5)dontAdd = false;
+
+                    if (!dontAdd && set.add(t)) {
                         mainText.add(t);
                         Log.d(LOG_TAG, "adding " + t);
                     }
+                    else Log.d(LOG_TAG,"not adding " + String.valueOf(dontAdd));
                     textFinal += t;
                 }
             }
-           // else  Log.d(LOG_TAG,"word null " + str);
+            else  Log.d(LOG_TAG,"word null " + str);
         }
 
 
@@ -301,6 +313,9 @@ public class VoiceRecognitionActivity extends Activity implements
             set.remove(removeText.element().toString());
             removeText.remove();
         }
+        set.clear();
+        Log.i(LOG_TAG, "onResults " + set.size());
+        tick = 500;
 
         toggleButton.setChecked(true);
     }
@@ -412,8 +427,14 @@ public class VoiceRecognitionActivity extends Activity implements
     @Override
     protected void onDestroy()
     {
+
         super.onDestroy();
+        repeatTTS.stop();
+        repeatTTS.shutdown();
+        speech.stopListening();
         speech.destroy();
+
+        tick = 1000000;
 
         serialization.<Dictionary>saveData_(Dictionary.getInstance(),filePath);
         serialization.<CategoryDictionary>saveData_(CategoryDictionary.getInstance(), filePath1);
