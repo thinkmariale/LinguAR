@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 package com.linguar;
 
 import android.app.Activity;

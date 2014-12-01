@@ -1,5 +1,7 @@
 package com.linguar.dictionary;
 
+import android.util.Log;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,14 +16,16 @@ public class CategoryDictionary implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	private static CategoryDictionary instance = new CategoryDictionary();
-	
+
+    private static List<Category> DefaultCategories;
 	private static HashMap<Category, List<String> > category_dictionary;
 	
 	// initializer 
 		{
 			category_dictionary = new HashMap<Category, List<String> >();
-			
-		}
+            DefaultCategories = new ArrayList<Category>();
+        }
+
 	//get instance
 	/* Static 'instance' method */
 	public static CategoryDictionary getInstance( ) {
@@ -32,7 +36,16 @@ public class CategoryDictionary implements Serializable {
 	{
 		category_dictionary = c;
 	}
-	
+
+    public void setDefaultCategories(List<Category> c)
+    {
+        DefaultCategories = c;
+    }
+
+    public List<Category> getDefaultCategories()
+    {
+        return DefaultCategories;
+    }
 	public HashMap<Category, List<String> > getCatDictionary(){
 		return category_dictionary;
 	} 
@@ -57,23 +70,43 @@ public class CategoryDictionary implements Serializable {
 		List<Category> top = new ArrayList<Category>()
 				{{ add(new Category()); add(new Category()); add(new Category()); 
 				add(new Category()); add(new Category()); }} ;
-				
+
+        //poppulating from top cat
 		for (Category key : category_dictionary.keySet()) {
-			int c = 0;
-			
-			while(c < top.size() )
-			{
-				if(key.counter > top.get(c).counter){
-					//getWordsFromCategory(key);
-					top.remove(c);
-					top.add(c,key);
-					//getWordsFromCategory(top.get(c));
-					break;
-				}
-				else c++;
-			}  
-		}
-		
+            int c = 0;
+
+            while (c < top.size()) {
+                if (key.counter > top.get(c).counter) {
+                    //getWordsFromCategory(key);
+                    top.remove(c);
+                    top.add(c, key);
+                    //getWordsFro   mCategory(top.get(c));
+                    break;
+                } else c++;
+            }
+        }
+
+        //if some still null, add
+        int d = 0;
+        int c = 0;
+        List<Integer> intList = new ArrayList<Integer>();
+
+        for(Category cat: top)
+        {
+            if((cat.category == null || cat.category=="" || cat.category.isEmpty()) )
+            {
+               intList.add(c);
+            }
+            c++;
+        }
+        for(Integer i : intList)
+        {
+            top.remove(i);
+            top.add(i, DefaultCategories.get(d));
+            d++;
+        }
+
+
 		return top;
 		
 	}

@@ -19,7 +19,7 @@ public class Serialization {
             out.writeObject(tClass);
             out.close();
             fileOut.close();
-            System.out.printf("Serialized data is saved in dictionary.ser");
+            System.out.println("Serialized data is saved ");
         }catch(Exception i)
         {
             i.printStackTrace();
@@ -67,7 +67,7 @@ public class Serialization {
 	         out.writeObject(dir);
 	         out.close();
 	         fileOut.close();
-	         System.out.printf("Serialized data is saved in dictionary.ser");
+	         System.out.println("Serialized data is saved in dictionary.ser");
 	         
 	         // Category dictionary
 	         fileOut1 = new FileOutputStream(filePath1);
@@ -75,7 +75,7 @@ public class Serialization {
 	         out1.writeObject(cat);
 	         out1.close();
 	         fileOut1.close();
-	         System.out.printf("Serialized data is saved in cat_dictionary.ser");
+	         System.out.println("Serialized data is saved in cat_dictionary.ser");
 	      }catch(Exception i)
 	      {
 	          i.printStackTrace();

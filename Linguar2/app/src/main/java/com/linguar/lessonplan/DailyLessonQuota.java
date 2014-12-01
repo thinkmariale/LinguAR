@@ -1,5 +1,6 @@
 package com.linguar.lessonplan;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -7,16 +8,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-public class DailyLessonQuota {
+public class DailyLessonQuota implements Serializable {
 
-    private static DailyLessonQuota _instance;
+    private static DailyLessonQuota _instance = new DailyLessonQuota();
 
     public static DailyLessonQuota getInstance() {
         return _instance;
-    }
-
-    private DailyLessonQuota() {
-        _instance = new DailyLessonQuota();
     }
 
     private SimpleDateFormat todaysDate = new SimpleDateFormat("yyyyMMdd");
@@ -27,6 +24,22 @@ public class DailyLessonQuota {
 
     //Serialized 14 Words
     public HashMap<String, Integer> wordsShown;
+/*
+    public HashMap<String, Integer> getShownWordHashMap(String word)
+    {
+       if(this.wordsShown.containsKey(word)) {
+       return this.wordsShown;
+       }
+        else
+       {
+           this.wordsShown.put(word, 0);
+           return wordsShown;
+       }
+    }
+
+    public void putWordInWordsShown(String key, int value) {
+        this.wordsShown.put(key,value);
+    }
 
     public List<String> resolveDatesAndReturnWords()
     {
@@ -62,5 +75,5 @@ public class DailyLessonQuota {
 
         return englishWords;
     }
-
+*/
 }

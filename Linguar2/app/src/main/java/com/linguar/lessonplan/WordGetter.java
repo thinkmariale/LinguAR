@@ -1,5 +1,7 @@
 package com.linguar.lessonplan;
 
+import android.util.Log;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -13,14 +15,14 @@ import com.linguar.dictionary.*;
  *
  */
 public class WordGetter{
-	
 
 	public final int MAX_WORDS_IN_24_HOURS = 7;
 	private CategoryDictionary _cDictionary;
     private Dictionary _dictionary;
     private DailyLessonQuota _dQuota;
 
-    private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddkkmmss");
+    private SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+    private SimpleDateFormat newsdgf = new SimpleDateFormat("yyyyMMddkkmmss");
     private long todaysDate;
     /**
 	 * Returns the list of 7 words from the list of Categories. The list is shuffled. These words have not been shown in the last 24 hours
@@ -30,10 +32,11 @@ public class WordGetter{
 	 */
 	public List<String> getWordsFromCategoryList(List<Category> categoryList) throws Exception
 	{
-		 _cDictionary =  CategoryDictionary.getInstance();
+		_cDictionary =  CategoryDictionary.getInstance();
         _dictionary = Dictionary.getInstance();
         _dQuota = DailyLessonQuota.getInstance();
-        todaysDate = Long.getLong(sdf.format(Calendar.getInstance().getTime()));
+        System.out.println(sdf.format(Calendar.getInstance().getTime()));
+        todaysDate = Long.valueOf(sdf.format(Calendar.getInstance().getTime()));
 		List<String> allCategoryWords =  new ArrayList<String>();
 		
 		if(categoryList.size() < 5)
@@ -60,16 +63,22 @@ public class WordGetter{
 		List<String> finalWordList = new ArrayList<String>();
         HashMap<String, Word> wordDictionary = _dictionary.getDictionary();
 
-        for(String word : allCategoryWords)
-        {
-            String lastShown = wordDictionary.get(word).stats.lastShown;
-            if(lastShown!=null || lastShown !="")
-            {
-                if(todaysDate-Long.getLong(lastShown)>=1000000) //Differece of 24 hours
+        System.out.println("size " + _dictionary.getDictionary().size());
+
+        for(String word : allCategoryWords) {
+
+                if (_dictionary.getWord(word,false)== null){
+                    Log.d("WG", "paila");
+                    continue;
+                }
+
+               String lastShown = wordDictionary.get(word).stats.lastShown;
+
+            if (!lastShown.equals("") || lastShown.length() != 0) {
+                System.out.println("LastShown " + lastShown + " " + lastShown.length());
+                if (todaysDate - Long.valueOf(lastShown) >= 1000000) //Differece of 24 hours
                     finalWordList.add(word);
-            }
-            else
-            {
+            } else {
                 finalWordList.add(word);
             }
 
