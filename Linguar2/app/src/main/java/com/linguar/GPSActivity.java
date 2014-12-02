@@ -2,6 +2,7 @@ package com.linguar;
 
 import android.app.Activity;
 import android.content.Context;
+import android.location.Criteria;
 import android.location.Location;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
@@ -108,6 +109,10 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
         // to a backend database if it gets too slow.
 
         // Obtain location services
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setAltitudeRequired(true);
+
         Object systemService = this.getSystemService(Context.LOCATION_SERVICE);
         if (!(systemService instanceof LocationManager)) {
             // Display a card that indicates error
@@ -117,7 +122,7 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
         }
         LocationManager locationManager = (LocationManager)systemService;
 
-        List<String> providers = locationManager.getProviders(true);
+        List<String> providers = locationManager.getProviders(criteria, true);
         if (providers.isEmpty()) {
             // Display a card that indicates error
             buildErrorCard("If at first you don't succeed..."
