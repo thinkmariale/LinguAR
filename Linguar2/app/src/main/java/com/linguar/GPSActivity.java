@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.location.Criteria;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.speech.tts.TextToSpeech;
@@ -31,6 +32,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
+import java.util.Set;
 
 import org.json.*;
 
@@ -121,7 +123,7 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
 
         //Object systemService = this.getSystemService(Context.LOCATION_SERVICE);
         //if (!(systemService instanceof LocationManager)) {
-            // Display a card that indicates error
+        // Display a card that indicates error
         //    buildErrorCard("Fail fast, fail hard. Couldn't find the Location Service."
         //            + " Try again from the main menu.");
         //    return;
@@ -130,11 +132,11 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
 
         //List<String> providers = locationManager.getProviders(criteria, true);
         //if (providers.isEmpty()) {
-            // Display a card that indicates error
+        // Display a card that indicates error
         //    buildErrorCard("If at first you don't succeed..."
-         //           + " Ok, we couldn't find loc providers."
-         //           + " Try again from the main menu.");
-         //   return;
+        //           + " Ok, we couldn't find loc providers."
+        //           + " Try again from the main menu.");
+        //   return;
         //}
 
         //Location currentLocation = null;
@@ -143,7 +145,7 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
         //    currentLocation = locationManager.getLastKnownLocation(provider);
         //}
         //if (currentLocation == null) {
-            // Display a card that indicates an error
+        // Display a card that indicates an error
         //    buildErrorCard("Where are you? Where am I? Couldn't find location."
         //            + " Try again from the main menu.");
         //    return;
@@ -155,125 +157,122 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
         // Render a card to tell the user where they are
 
 
+        try {
+            // Look up the location in Google Places
+            HttpURLConnection url = null;
 
+            StringBuilder sb = new StringBuilder(PLACES_API_BASE);
+            // Required params: key, latitude, longitude, radius
+            sb.append("?key=AIzaSyBjIHOsSWfsoPhgTSv7-tCyir3HPx1t-aQ");
+            sb.append("&location=" + latitude + "," + longitude);
+            sb.append("&radius=" + PLACES_RADIUS_DEFAULT);
 
+            URL urlString = new URL(sb.toString());
 
-            t = new Thread() {
+            // Send the request
+            url = (HttpURLConnection) urlString.openConnection();
 
-                public void run() {
-                try {
-                    // Look up the location in Google Places
-                    HttpURLConnection url = null;
+            // Get the response
+            if (url.getResponseCode() == HttpURLConnection.HTTP_OK) {
+//                // Look up the place type
+//                BufferedReader reader = new BufferedReader(new InputStreamReader(urlString.openStream()));
+//                StringBuffer res = new StringBuffer();
+//                String line;
+//
+//                while ((line = reader.readLine()) != null) {
+//                    res.append(line);
+//                }
+//
+//                reader.close();
+//
+//                JSONObject obj = new JSONObject(res.toString());
+//                JSONArray results = obj.getJSONArray("results");
+//                JSONObject firstResult = results.getJSONObject(0);
+//                JSONArray types = firstResult.getJSONArray("types");
+//
+//                if (types == null || types.length() == 0) {
+//                    // Display a card that says Geolocation has not found anything special
+//                    buildErrorCard("Geolocation couldn't find anything special."
+//                            + " Try again from the main menu.");
+//                    return;
+//                }
 
-                    StringBuilder sb = new StringBuilder(PLACES_API_BASE);
-                    // Required params: key, latitude, longitude, radius
-                    sb.append("?key=AIzaSyBjIHOsSWfsoPhgTSv7-tCyir3HPx1t-aQ");
-                    sb.append("&location=" + latitude + "," + longitude);
-                    sb.append("&radius=" + PLACES_RADIUS_DEFAULT);
+                PlacesTypes placesTypes = new PlacesTypes();
+                placesTypes.execute("" + latitude, "" + longitude);
+                Set<String> typesAsSet = placesTypes.getResults();
 
-                    URL urlString = new URL(sb.toString());
+                String fsClientKey = "5053XWDMYGDL1ECJGBD4R2FIX4XNWJLCFN0WMVDVWTDZANV0";
+                String fsClientSec = "DIALY1OMS1Q3WGBXJ4MWC3X0MTNQE3KOZSYRK23OSMJQ5HDF";
 
-                    // Send the request
-                    url = (HttpURLConnection) urlString.openConnection();
+                if (typesAsSet.contains("restaurant")) {
+                    // There is a restaurant nearby! Now we will ask Foursquare for its info
+                    FSAPICall apiCall = new FSAPICall();
+                    apiCall.execute(fsClientKey, fsClientSec, "" + latitude, "" + longitude);
+                    String[] rest_ids = apiCall.getResults();
 
-                    // Get the response
-                    if (url.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                        // Look up the place type
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(urlString.openStream()));
-                        StringBuffer res = new StringBuffer();
-                        String line;
+                    // We have obtained the restaurant Ids. Now we must pick a restaurant Id
+                    // and hope it is the correct restaurant, then obtain its menu. We will
+                    // use the menus API in Foursquare to obtain the menu via Id.
+                    // We will also display the provider, as Foursquare requested.
+                    if (rest_ids.length == 0) {
+                        // Display a card that says Geolocation's Foursquare API call failed
+                        buildErrorCard("Glass to Foursquare, do you copy? Nope, guess not. "
+                                + "Aborting mission. Try again from the main menu.");
+                        return;
+                    }
+                    String firstIdHopeForTheBest = rest_ids[0];
 
-                        while ((line = reader.readLine()) != null) {
-                            res.append(line);
+                    // Make the menu api call
+                    FSMenuAPICall menuCall = new FSMenuAPICall();
+                    menuCall.execute(fsClientKey, fsClientSec, firstIdHopeForTheBest);
+
+                    String[] menuItems = menuCall.getResults();
+
+                    if (menuItems.length == 0) {
+                        Log.d(TAG, "Could not retrieve menu items");
+                        // Display a card that says Geolocation mode is failing
+                        buildErrorCard("Foursquare says there are no menu items. Exiting."
+                                + " Try again from the main menu.");
+                        return;
+                    }
+
+                    // ***************************************************************************
+                    // ***************************************************************************
+                    // ***************************************************************************
+                    //                        BEGIN LIST RELATED CODE!
+                    //                        The array [finalMenuItems] will hold
+                    //                        up to 10 menu items from the first
+                    //                        restaurant returned by our Google Places search.
+                    //
+                    //                        These menu items are Strings, but can contain
+                    //                        more than one word, e.g. "chocolate mocha latte"
+                    //                        We still need to break down those Strings to
+                    //                        each individual word before translating it.
+                    //
+                    //                        tl;dr [finalMenuItems] is the list!!!!
+
+                    finalMenuItems = menuItems;
+                    if (menuItems.length > 10) {
+                        Log.d(TAG, "Shortening menu items by selecting random items");
+                        finalMenuItems = new String[10];
+                        Random generator = new Random();
+                        for (int i = 0; i < 10; i++) {
+                            int nextRandomIndex = generator.nextInt(menuItems.length);
+                            finalMenuItems[i] = menuItems[nextRandomIndex];
                         }
+                    }
 
-                        reader.close();
-
-                        JSONObject obj = new JSONObject(res.toString());
-                        JSONArray results = obj.getJSONArray("results");
-                        JSONObject firstResult = results.getJSONObject(0);
-                        JSONArray types = firstResult.getJSONArray("types");
-
-                        if (types == null || types.length() == 0) {
-                            // Display a card that says Geolocation has not found anything special
-                            buildErrorCard("Geolocation couldn't find anything special."
-                                    + " Try again from the main menu.");
-                            return;
-                        }
-
-                        HashSet<String> typesAsSet = new HashSet<String>();
-                        for (int i = 0; i < types.length(); i++) {
-                            String nextType = types.getString(i);
-                            typesAsSet.add(nextType);
-                        }
-
-                        String fsClientKey = "5053XWDMYGDL1ECJGBD4R2FIX4XNWJLCFN0WMVDVWTDZANV0";
-                        String fsClientSec = "DIALY1OMS1Q3WGBXJ4MWC3X0MTNQE3KOZSYRK23OSMJQ5HDF";
-
-                        if (typesAsSet.contains("restaurant")) {
-                            // There is a restaurant nearby! Now we will ask Foursquare for its info
-                            String[] rest_ids = fsApiCall(fsClientKey, fsClientSec, latitude, longitude);
-
-                            // We have obtained the restaurant Ids. Now we must pick a restaurant Id
-                            // and hope it is the correct restaurant, then obtain its menu. We will
-                            // use the menus API in Foursquare to obtain the menu via Id.
-                            // We will also display the provider, as Foursquare requested.
-                            if (rest_ids.length == 0) {
-                                // Display a card that says Geolocation's Foursquare API call failed
-                                buildErrorCard("Glass to Foursquare, do you copy? Nope, guess not. "
-                                        + "Aborting mission. Try again from the main menu.");
-                                return;
-                            }
-                            String firstIdHopeForTheBest = rest_ids[0];
-
-                            // Make the menu api call
-                            String[] menuItems = fsMenuApiCall(fsClientKey, fsClientSec, firstIdHopeForTheBest);
-
-                            if (menuItems.length == 0) {
-                                Log.d(TAG, "Could not retrieve menu items");
-                                // Display a card that says Geolocation mode is failing
-                                buildErrorCard("Foursquare says there are no menu items. Exiting."
-                                        + " Try again from the main menu.");
-                                return;
-                            }
-
-                            // ***************************************************************************
-                            // ***************************************************************************
-                            // ***************************************************************************
-                            //                        BEGIN LIST RELATED CODE!
-                            //                        The array [finalMenuItems] will hold
-                            //                        up to 10 menu items from the first
-                            //                        restaurant returned by our Google Places search.
-                            //
-                            //                        These menu items are Strings, but can contain
-                            //                        more than one word, e.g. "chocolate mocha latte"
-                            //                        We still need to break down those Strings to
-                            //                        each individual word before translating it.
-                            //
-                            //                        tl;dr [finalMenuItems] is the list!!!!
-
-                            finalMenuItems = menuItems;
-                            if (menuItems.length > 10) {
-                                Log.d(TAG, "Shortening menu items by selecting random items");
-                                finalMenuItems = new String[10];
-                                Random generator = new Random();
-                                for (int i = 0; i < 10; i++) {
-                                    int nextRandomIndex = generator.nextInt(menuItems.length);
-                                    finalMenuItems[i] = menuItems[nextRandomIndex];
-                                }
-                            }
-
-                            currentcard = 0;
-                            if (finalMenuItems.length > 0) {
-                                String menuItem = finalMenuItems[currentcard];
-                                String spanishVersion = translateThisWord(menuItem);
-                                //one card
-                                setContentView(R.layout.activity_gps_result);
-                                englishFood = (TextView) findViewById(R.id.textView1);
-                                spanishFood = (TextView) findViewById(R.id.textView2);
-                                englishFood.setText(menuItem);
-                                spanishFood.setText(spanishVersion);
-                            }
+                    currentcard = 0;
+                    if (finalMenuItems.length > 0) {
+                        String menuItem = finalMenuItems[currentcard];
+                        String spanishVersion = translateThisWord(menuItem);
+                        //one card
+                        setContentView(R.layout.activity_gps_result);
+                        englishFood = (TextView) findViewById(R.id.textView1);
+                        spanishFood = (TextView) findViewById(R.id.textView2);
+                        englishFood.setText(menuItem);
+                        spanishFood.setText(spanishVersion);
+                    }
                     /*
                     for (String menuItem : finalMenuItems) {
                         // Display a card, translate the item, etc. etc.
@@ -286,167 +285,280 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
                         englishFood.setText(menuItem);
                         spanishFood.setText(spanishVersion);
                     }*/
-                            // ****************************************************************************
-                            // ****************************************************************************
-                            // ****************************************************************************
+                    // ****************************************************************************
+                    // ****************************************************************************
+                    // ****************************************************************************
+                }
+
+            } else {
+                // Show an error card that says we can't connect
+                buildErrorCard("Is there really wi-fi around here?"
+                        + " You know we need wi-fi to get the show on the road, right?"
+                        + " Give up on this mode, do something offline.");
+                return;
+            }
+
+            buildErrorCard("Geo Mode only works for restaurants for now. Come back later, sorry.");
+
+        } catch (Exception e) {
+            // Display a card that indicates an error
+            buildErrorCard("Have you ever wanted to read a cryptic exception message? " + e);
+            Log.d(TAG, "Have you ever wanted to read a cryptic exception message?" + e);
+        }
+
+    }
+
+    private static class PlacesTypes extends AsyncTask<String, Void, Set<String>> {
+        private Set<String> exResult;
+
+        public Set<String> getResults() {
+            return exResult;
+        }
+
+        public Set<String> doInBackground(String... params) {
+            String latitude = params[0];
+            String longitude = params[1];
+            // Look up the location in Google Places
+            HttpURLConnection url = null;
+
+            StringBuilder sb = new StringBuilder(PLACES_API_BASE);
+            // Required params: key, latitude, longitude, radius
+            sb.append("?key=AIzaSyBjIHOsSWfsoPhgTSv7-tCyir3HPx1t-aQ");
+            sb.append("&location=" + latitude + "," + longitude);
+            sb.append("&radius=" + PLACES_RADIUS_DEFAULT);
+
+            try {
+                URL urlString = new URL(sb.toString());
+
+                // Send the request
+                url = (HttpURLConnection) urlString.openConnection();
+
+                // Get the response
+                if (url.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    // Look up the place type
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(urlString.openStream()));
+                    StringBuffer res = new StringBuffer();
+                    String line;
+
+                    while ((line = reader.readLine()) != null) {
+                        res.append(line);
+                    }
+
+                    reader.close();
+
+                    JSONObject obj = new JSONObject(res.toString());
+                    JSONArray results = obj.getJSONArray("results");
+                    JSONObject firstResult = results.getJSONObject(0);
+                    JSONArray types = firstResult.getJSONArray("types");
+
+                    if (types == null || types.length() == 0) {
+                        // Display a card that says Geolocation has not found anything special
+                        //buildErrorCard();
+                        Log.d(TAG, "Geolocation couldn't find anything special."
+                                + " Try again from the main menu.");
+                        exResult = new HashSet<String>();
+                        return new HashSet<String>();
+                    }
+
+                    Set<String> result = new HashSet<String>();
+                    for (int i = 0; i < types.length(); i++) {
+                        try {
+                            result.add(types.getString(i));
+                        } catch (JSONException e) {
+                            Log.d(TAG, "Could not get the restaurant types: " + e);
                         }
-
-                    } else {
-                        // Show an error card that says we can't connect
-                        buildErrorCard("Is there really wi-fi around here?"
-                                + " You know we need wi-fi to get the show on the road, right?"
-                                + " Give up on this mode, do something offline.");
-                        return;
                     }
-
-                    buildErrorCard("Geo Mode only works for restaurants for now. Come back later, sorry.");
-
-                } catch (Exception e) {
-                    // Display a card that indicates an error
-                    buildErrorCard("Have you ever wanted to read a cryptic exception message? " + e);
-                    Log.d(TAG, "Have you ever wanted to read a cryptic exception message?" + e);
+                    exResult = result;
+                    return result;
                 }
+            } catch (MalformedURLException e) {
+                Log.d(TAG, "Malformed URL: " + e);
+                exResult = new HashSet<String>();
+                return new HashSet<String>();
+            } catch (JSONException e) {
+                Log.d(TAG, "Bad JSON Parsing: " + e);
+                exResult = new HashSet<String>();
+                return new HashSet<String>();
+            } catch (IOException e) {
+                Log.d(TAG, "IO Exception: " + e);
+                exResult = new HashSet<String>();
+                return new HashSet<String>();
             }
-        };
-
-        t.start();
-
-    }
-
-
-    private String[] fsApiCall(String cKey, String cSec, double lat, double lng) {
-        StringBuffer buffer = new StringBuffer(FS_REST_API_BASE);
-        buffer.append("?client_key=" + cKey);
-        buffer.append("&client_secret=" + cSec);
-        buffer.append("&v=" + FS_VERSION);
-        buffer.append("&ll=" + lat + "," + lng);
-
-        try {
-            URL urlString = new URL(buffer.toString());
-
-            HttpURLConnection url = (HttpURLConnection)urlString.openConnection();
-
-            if (url.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                // Go through the response using a JSON parser and find the venues
-                // Then for each venue record the id in an ArrayList
-                ArrayList<String> venues = new ArrayList<String>();
-
-                // Read in the response
-                BufferedReader responseReader = new BufferedReader(new InputStreamReader(url.getInputStream()));
-                StringBuffer response = new StringBuffer();
-                String line;
-
-                while ((line = responseReader.readLine()) != null) {
-                    response.append(line);
-                }
-
-                responseReader.close();
-
-                // Finished reading the response. Now we will use a JSON parser to extract
-                // the information that we need from the response (mostly IDs)
-                JSONObject obj = new JSONObject(response.toString());
-
-                JSONArray theVenues = obj.getJSONObject("response").getJSONArray("venues");
-                for (int i = 0; i < theVenues.length(); i++) {
-                    // Get the i-th venue and extract its ID
-                    JSONObject nextVenue = theVenues.getJSONObject(i);
-                    String venueId = nextVenue.getString("id");
-                    venues.add(venueId);
-                }
-
-                return venues.toArray(new String[venues.size()]);
-            } else {
-                Log.d(TAG, "Foursquare API Response not 200");
-                return new String[0];
-            }
-
-        } catch (MalformedURLException e) {
-            Log.d(TAG, "Foursquare API Call: " + e.toString());
-            return new String[0];
-        } catch (IOException e) {
-            Log.d(TAG, "Foursquare API Call: " + e.toString());
-            return new String[0];
-        } catch (JSONException e) {
-            Log.d(TAG, "JSON Parsing Foursquare Response: " + e.toString());
-            return new String[0];
+            Log.d(TAG, "Response was not HTTP OK");
+            exResult = new HashSet<String>();
+            return new HashSet<String>();
         }
     }
 
-    private String[] fsMenuApiCall(String cKey, String cSec, String rId) {
-        StringBuilder builder = new StringBuilder(FS_MENU_API_BASE);
-        builder.append(rId + "/menu");
-        builder.append("?v=" + FS_VERSION);
-        builder.append("&client_id=" + cKey);
-        builder.append("&client_secret=" + cSec);
 
-        try {
-            URL urlString = new URL(builder.toString());
-            HttpURLConnection connection = (HttpURLConnection)urlString.openConnection();
+    private static class FSAPICall extends AsyncTask<String, Void, String[]> {
+        private String[] exResults;
 
-            if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                // This ArrayList will hold our extracted menu items
-                ArrayList<String> menuItems = new ArrayList<String>();
+        public String[] getResults() {
+            return exResults;
+        }
 
-                // We have established a connection to the API and are in the process of
-                // reading in the response. We shall read in the response and parse the JSON!
-                BufferedReader responseReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-                StringBuffer res = new StringBuffer();
-                String line;
+        // params[0] = cKey, params[1] = cSec, params[2] = lat, params[3] = lng
+        public String[] doInBackground(String... params) {
+            String cKey = params[0];
+            String cSec = params[1];
+            String lat = params[2];
+            String lng = params[3];
+            StringBuffer buffer = new StringBuffer(FS_REST_API_BASE);
+            buffer.append("?client_key=" + cKey);
+            buffer.append("&client_secret=" + cSec);
+            buffer.append("&v=" + FS_VERSION);
+            buffer.append("&ll=" + lat + "," + lng);
 
-                while ((line = responseReader.readLine()) != null) {
-                    res.append(line);
-                }
+            try {
+                URL urlString = new URL(buffer.toString());
 
-                responseReader.close();
+                HttpURLConnection url = (HttpURLConnection)urlString.openConnection();
 
-                // Now we parse the JSON response to extract the menu and put it in [menuItems]
-                JSONObject obj = new JSONObject(res.toString());
+                if (url.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    // Go through the response using a JSON parser and find the venues
+                    // Then for each venue record the id in an ArrayList
+                    ArrayList<String> venues = new ArrayList<String>();
 
-                JSONObject responseJson = obj.getJSONObject("response");
-                JSONObject mJson = responseJson.getJSONObject("menu");
-                JSONObject menusJson = mJson.getJSONObject("menus");
-                String menusCount = menusJson.getString("count");
-                Integer menusCountInt = new Integer(menusCount);
-                JSONArray items = menusJson.getJSONArray("items");
-                for (int i = 0; i < menusCountInt; i++) {
-                    JSONObject menu = items.getJSONObject(i);
-                    // The entries is still like, a 4th tier wrapper field
-                    // We still need to extract the count from the entries wrapper
-                    // Then we loop for count iterations and get the count items
-                    // I got this all from
-                    // https://developer.foursquare.com/docs/explore#req=venues/
-                    // 47a1bddbf964a5207a4d1fe3/menu
-                    // Just looked for the pretty menu items
-                    JSONObject entries = menu.getJSONObject("entries");
-                    String outerEntriesCount = entries.getString("count");
-                    Integer outerEntriesCountInt = new Integer(outerEntriesCount);
-                    JSONObject innerEntries = entries.getJSONObject("entries");
-                    JSONArray innerItems = innerEntries.getJSONArray("items");
+                    // Read in the response
+                    BufferedReader responseReader = new BufferedReader(new InputStreamReader(url.getInputStream()));
+                    StringBuffer response = new StringBuffer();
+                    String line;
 
-                    for (int j = 0; j < outerEntriesCountInt; j++) {
-                        JSONObject innerEntry = innerItems.getJSONObject(i);
-                        // Ok now we need to get "items" again because it's double nested
-                        String entryName = innerEntry.getString("name");
-                        menuItems.add(entryName);
+                    while ((line = responseReader.readLine()) != null) {
+                        response.append(line);
                     }
+
+                    responseReader.close();
+
+                    // Finished reading the response. Now we will use a JSON parser to extract
+                    // the information that we need from the response (mostly IDs)
+                    JSONObject obj = new JSONObject(response.toString());
+
+                    JSONArray theVenues = obj.getJSONObject("response").getJSONArray("venues");
+                    for (int i = 0; i < theVenues.length(); i++) {
+                        // Get the i-th venue and extract its ID
+                        JSONObject nextVenue = theVenues.getJSONObject(i);
+                        String venueId = nextVenue.getString("id");
+                        venues.add(venueId);
+                    }
+
+                    exResults = venues.toArray(new String[venues.size()]);
+                    return exResults;
+                } else {
+                    Log.d(TAG, "Foursquare API Response not 200");
+                    exResults = new String[0];
+                    return new String[0];
                 }
 
-                return menuItems.toArray(new String[menuItems.size()]);
-            } else {
-                Log.d(TAG, "Bad response from Foursquare Menu API Call");
+            } catch (MalformedURLException e) {
+                Log.d(TAG, "Foursquare API Call: " + e.toString());
+                exResults = new String[0];
+                return new String[0];
+            } catch (IOException e) {
+                Log.d(TAG, "Foursquare API Call: " + e.toString());
+                exResults = new String[0];
+                return new String[0];
+            } catch (JSONException e) {
+                Log.d(TAG, "JSON Parsing Foursquare Response: " + e.toString());
+                exResults = new String[0];
                 return new String[0];
             }
-
-        } catch (MalformedURLException e) {
-            Log.d(TAG, "Foursquare Menu API Call: " + e);
-            return new String[0];
-        } catch (IOException e) {
-            Log.d(TAG, "Foursquare Menu API Call: " + e);
-            return new String[0];
-        } catch (JSONException e) {
-            Log.d(TAG, "Foursquare Menu JSON Parsing error: " + e);
-            return new String[0];
         }
+    }
+
+    private static class FSMenuAPICall extends AsyncTask<String, Void, String[]> {
+        private String[] exResults;
+
+        public String[] getResults() {
+            return exResults;
+        }
+
+        public String[] doInBackground(String... params) {
+            String cKey = params[0];
+            String cSec = params[1];
+            String rId = params[2];
+            StringBuilder builder = new StringBuilder(FS_MENU_API_BASE);
+            builder.append(rId + "/menu");
+            builder.append("?v=" + FS_VERSION);
+            builder.append("&client_id=" + cKey);
+            builder.append("&client_secret=" + cSec);
+
+            try {
+                URL urlString = new URL(builder.toString());
+                HttpURLConnection connection = (HttpURLConnection)urlString.openConnection();
+
+                if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                    // This ArrayList will hold our extracted menu items
+                    ArrayList<String> menuItems = new ArrayList<String>();
+
+                    // We have established a connection to the API and are in the process of
+                    // reading in the response. We shall read in the response and parse the JSON!
+                    BufferedReader responseReader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    StringBuffer res = new StringBuffer();
+                    String line;
+
+                    while ((line = responseReader.readLine()) != null) {
+                        res.append(line);
+                    }
+
+                    responseReader.close();
+
+                    // Now we parse the JSON response to extract the menu and put it in [menuItems]
+                    JSONObject obj = new JSONObject(res.toString());
+
+                    JSONObject responseJson = obj.getJSONObject("response");
+                    JSONObject mJson = responseJson.getJSONObject("menu");
+                    JSONObject menusJson = mJson.getJSONObject("menus");
+                    String menusCount = menusJson.getString("count");
+                    Integer menusCountInt = new Integer(menusCount);
+                    JSONArray items = menusJson.getJSONArray("items");
+                    for (int i = 0; i < menusCountInt; i++) {
+                        JSONObject menu = items.getJSONObject(i);
+                        // The entries is still like, a 4th tier wrapper field
+                        // We still need to extract the count from the entries wrapper
+                        // Then we loop for count iterations and get the count items
+                        // I got this all from
+                        // https://developer.foursquare.com/docs/explore#req=venues/
+                        // 47a1bddbf964a5207a4d1fe3/menu
+                        // Just looked for the pretty menu items
+                        JSONObject entries = menu.getJSONObject("entries");
+                        String outerEntriesCount = entries.getString("count");
+                        Integer outerEntriesCountInt = new Integer(outerEntriesCount);
+                        JSONObject innerEntries = entries.getJSONObject("entries");
+                        JSONArray innerItems = innerEntries.getJSONArray("items");
+
+                        for (int j = 0; j < outerEntriesCountInt; j++) {
+                            JSONObject innerEntry = innerItems.getJSONObject(i);
+                            // Ok now we need to get "items" again because it's double nested
+                            String entryName = innerEntry.getString("name");
+                            menuItems.add(entryName);
+                        }
+                    }
+
+                    exResults = menuItems.toArray(new String[menuItems.size()]);
+                    return exResults;
+                } else {
+                    Log.d(TAG, "Bad response from Foursquare Menu API Call");
+                    exResults = new String[0];
+                    return new String[0];
+                }
+
+            } catch (MalformedURLException e) {
+                Log.d(TAG, "Foursquare Menu API Call: " + e);
+                exResults = new String[0];
+                return new String[0];
+            } catch (IOException e) {
+                Log.d(TAG, "Foursquare Menu API Call: " + e);
+                exResults = new String[0];
+                return new String[0];
+            } catch (JSONException e) {
+                Log.d(TAG, "Foursquare Menu JSON Parsing error: " + e);
+                exResults = new String[0];
+                return new String[0];
+            }
+        }
+
     }
 
     private String translateThisWord(String word) {
