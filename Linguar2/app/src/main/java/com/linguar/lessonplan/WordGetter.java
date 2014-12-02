@@ -68,7 +68,7 @@ public class WordGetter{
         for(String word : allCategoryWords) {
 
                 if (_dictionary.getWord(word,false)== null){
-                    Log.d("WG", "paila");
+
                     continue;
                 }
 

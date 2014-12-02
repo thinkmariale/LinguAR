@@ -53,7 +53,7 @@ public class ReviewMode {
         //Get Spanish Translation
         HashMap<String, Word> wordDictionary = _dictionary.getDictionary();
 
-            for(int i = 0; i<dQuota.NO_OF_TIMES_PER_WORD; i++) {
+            for(int i = 0; i< dQuota.NO_OF_TIMES_PER_WORD; i++) {
 
                 for (String englishWord : englishWords) {
                    // if (dQuota.getShownWordHashMap(englishWord).get(englishWord) < dQuota.NO_OF_TIMES_PER_WORD) {

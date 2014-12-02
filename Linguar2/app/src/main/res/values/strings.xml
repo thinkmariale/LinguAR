@@ -10,5 +10,6 @@
     <string name="title_activity_continuous_listening">ContinuousListening</string>
     <string name="title_activity_emulator_test">EmulatorTest</string>
     <string name="title_activity_gps">GPSActivity</string>
+    <string name="title_activity_query">QueryActivity</string>
 
 </resources>

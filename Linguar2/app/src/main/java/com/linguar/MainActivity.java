@@ -206,6 +206,10 @@ public class MainActivity extends Activity {
                         Intent learning = new Intent(c, LessonActivity.class);
                         startActivity(learning);
                     }
+                    else if(currentCardIndex == 2){
+                        Intent learning = new Intent(c, QueryActivity.class);
+                        startActivity(learning);
+                    }
                     return true;
                 } else if (gesture == Gesture.TWO_TAP) {
                     // do something on two finger tap
