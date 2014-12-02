@@ -64,7 +64,7 @@ public class WordGetter{
         HashMap<String, Word> wordDictionary = _dictionary.getDictionary();
 
         System.out.println("size " + _dictionary.getDictionary().size());
-
+        Collections.shuffle(allCategoryWords);
         for(String word : allCategoryWords) {
 
                 if (_dictionary.getWord(word,false)== null){

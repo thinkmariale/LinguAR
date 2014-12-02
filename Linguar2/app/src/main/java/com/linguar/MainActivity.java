@@ -42,6 +42,8 @@ public class MainActivity extends Activity {
 
     private GestureDetector mGestureDetector;
 
+    private Card loadedCard;
+
     /** {@link CardScrollView} to use as the main content view. */
     private CardScrollView mCardScroller;
     private Card passiveCard;
@@ -81,6 +83,10 @@ public class MainActivity extends Activity {
         locationCard.addImage(R.drawable.menu_query);
         menuCards.add(locationCard);
 
+        loadedCard = new Card(this);
+        loadedCard.setImageLayout(Card.ImageLayout.FULL);
+        loadedCard.addImage(R.drawable.launching_page_b);
+
         currentCardIndex = 0;
 
         mView = buildView();
@@ -107,22 +113,14 @@ public class MainActivity extends Activity {
             @Override
             public int getPosition(Object item) { return 0; }
         });
-        /*
-        // Handle the TAP event.
-        mCardScroller.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Plays disallowed sound to indicate that TAP actions are not supported.
 
-                AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-                am.playSoundEffect(Sounds.DISALLOWED);
-
-            }
-        });
-        */
 
         setContentView(mView);
 
+        dictionaryLoader();
+    }
+
+    private void dictionaryLoader(){
         // load dictionaries
         Dictionary dic = Dictionary.getInstance();
         CategoryDictionary cat = CategoryDictionary.getInstance();
@@ -184,6 +182,8 @@ public class MainActivity extends Activity {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
+        setContentView(loadedCard.getView());
     }
 
     private GestureDetector createGestureDetector(Context context) {
@@ -290,7 +290,7 @@ public class MainActivity extends Activity {
         View card = new CardBuilder(this, CardBuilder.Layout.TITLE)
                 //.setText("")
                 //.setIcon(R.drawable.launching_page_B)
-                .addImage(R.drawable.launching_page_b)
+                .addImage(R.drawable.loading_dict)
                 .getView();
 
         return card;
