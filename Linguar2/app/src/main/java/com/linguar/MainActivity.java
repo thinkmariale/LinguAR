@@ -48,6 +48,7 @@ public class MainActivity extends Activity {
     private CardScrollView mCardScroller;
     private Card passiveCard;
     private Card lessonCard;
+    private Card queryCard;
     private Card locationCard;
     private int currentCardIndex;
 
@@ -78,9 +79,14 @@ public class MainActivity extends Activity {
         lessonCard.addImage(R.drawable.menu_mylesson);
         menuCards.add(lessonCard);
 
+        queryCard = new Card(this);
+        queryCard.setImageLayout(Card.ImageLayout.FULL);
+        queryCard.addImage(R.drawable.menu_query);
+        menuCards.add(queryCard);
+
         locationCard = new Card(this);
         locationCard.setImageLayout(Card.ImageLayout.FULL);
-        locationCard.addImage(R.drawable.menu_query);
+        locationCard.addImage(R.drawable.menu_gps);
         menuCards.add(locationCard);
 
         loadedCard = new Card(this);
@@ -210,6 +216,10 @@ public class MainActivity extends Activity {
                         Intent learning = new Intent(c, QueryActivity.class);
                         startActivity(learning);
                     }
+                    else if(currentCardIndex == 3){
+                        Intent learning = new Intent(c, GPSActivity.class);
+                        startActivity(learning);
+                    }
                     return true;
                 } else if (gesture == Gesture.TWO_TAP) {
                     // do something on two finger tap
@@ -217,7 +227,7 @@ public class MainActivity extends Activity {
                 } else if (gesture == Gesture.SWIPE_RIGHT) {
                     // do something on right (forward) swipe
                     am.playSoundEffect(Sounds.SELECTED);
-                    if(currentCardIndex < 2) {
+                    if(currentCardIndex < 3) {
                         currentCardIndex++;
                         setContentView(menuCards.get(currentCardIndex).getView());
                     }

@@ -64,8 +64,11 @@ public class Word {
         // min num of cats to consider showing
        // if(categoryList.size() > 2 )
        // {
-	    	for(Category cat:categoryList)
-			    cat.counter = cat.counter + 1;
+        System.out.println("cat set word: " + this.englishWord);
+	    	for(Category cat:categoryList) {
+                cat.counter = cat.counter + 1;
+                System.out.println("cat set: " + cat.category );
+            }
             return true;
 		//}
 

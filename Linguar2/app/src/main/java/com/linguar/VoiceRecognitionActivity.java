@@ -75,7 +75,7 @@ public class VoiceRecognitionActivity extends Activity implements
     private String[] filterWords = {"a","about","after","all","also","an","am","and","any","as",
                         "at","back","be","because","but","by","can","come","could",
                         "day","do","even","first","for","from","get","give","go","good",
-                        "have","he","her","him","his","how","I","if","in","into","is","it","its",
+                        "have","he","her","him","his","how","I","i","if","in","into","is","it","its",
                         "just","know","like","look","make","me","most","my","new","no","not",
                         "now","of","on","one","only","or","other","our","out","over","people",
                         "say","see","she","so","some","take","than","that","the","their","them",
@@ -261,26 +261,24 @@ public class VoiceRecognitionActivity extends Activity implements
         for(String str : all)
         {
             str = str.toLowerCase().trim();
-           // Log.d(LOG_TAG,"word " + str );
-            Word tempWord = dic.getWord(str, true);
-            if(tempWord != null)
+            if(!isFilterWord(str))
             {
-                if(!isFilterWord(tempWord.englishWord))
-                {
+                // Log.d(LOG_TAG,"word " + str );
+                Word tempWord = dic.getWord(str, true);
+                if (tempWord != null) {
                     String t = tempWord.englishWord + " ---- " + tempWord.spanishTranslation + "\n";
 
                     boolean dontAdd = isShowing;
-                    if(mainText.size() < 2)dontAdd = false;
+                    if (mainText.size() < 2) dontAdd = false;
 
                     if (!dontAdd && set.add(t)) {
                         mainText.add(t);
                         Log.d(LOG_TAG, "adding " + t);
-                    }
-                    else Log.d(LOG_TAG,"not adding " + String.valueOf(dontAdd));
+                    } else Log.d(LOG_TAG, "not adding " + String.valueOf(dontAdd));
                     textFinal += t;
-                }
+
+                } else Log.d(LOG_TAG, "word null " + str);
             }
-            else  Log.d(LOG_TAG,"word null " + str);
         }
 
         //returnedText.setText(textFinal);

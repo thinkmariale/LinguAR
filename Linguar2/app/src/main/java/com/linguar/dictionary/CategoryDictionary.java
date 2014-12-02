@@ -68,10 +68,11 @@ public class CategoryDictionary implements Serializable {
 	public List<Category> getTopCategories()
 	{
 		List<Category> top = new ArrayList<Category>()
-				{{ add(new Category()); add(new Category()); add(new Category()); 
-				add(new Category()); add(new Category()); }} ;
+				{{ add(new Category()); add(new Category()); }};//add(new Category());
+				//add(new Category()); add(new Category()); }} ;
 
         //poppulating from top cat
+        //Log.d("CAT", Integer.toString(category_dictionary.size()));
 		for (Category key : category_dictionary.keySet()) {
             int c = 0;
 
@@ -90,7 +91,7 @@ public class CategoryDictionary implements Serializable {
         int d = 0;
         int c = 0;
         List<Integer> intList = new ArrayList<Integer>();
-
+       // Log.d("CAT", "top " + Integer.toString(top.size()));
         for(Category cat: top)
         {
             if((cat.category == null || cat.category=="" || cat.category.isEmpty()) )
@@ -99,14 +100,17 @@ public class CategoryDictionary implements Serializable {
             }
             c++;
         }
+       // Log.d("CAT", "list " + Integer.toString(intList.size()));
         for(Integer i : intList)
         {
-            top.remove(i);
+            top.remove((int)i);
             top.add(i, DefaultCategories.get(d));
             d++;
+         //   Log.d("CAT", "remove " + Integer.toString(i) +  " top " + Integer.toString(top.size()));
+
         }
-
-
+       // Log.d("CAT", "index " + Integer.toString(c) + " " + Integer.toString(d));
+       // Log.d("CAT", "top " + Integer.toString(top.size()));
 		return top;
 		
 	}

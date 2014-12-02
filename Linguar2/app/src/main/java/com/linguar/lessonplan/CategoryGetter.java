@@ -31,6 +31,8 @@ public class CategoryGetter {
         List<Category> newCategoryList =  new ArrayList<Category>();
         newCategoryList =_catDictionary.getTopCategories();
 
+        return  newCategoryList;
+        /*
         for(Category cat : newCategoryList) {
             if(!(cat.category == null || cat.category=="" || cat.category.isEmpty()) )
                 topCategories.add(cat);
@@ -75,7 +77,7 @@ public class CategoryGetter {
 				}
 				return topFiveCategories;
 			}
-		}
+		}*/
 	}
 
 	/**
