@@ -60,6 +60,10 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
     private  String[] finalMenuItems;
     private Integer currentcard;
 
+    private Thread t;
+
+    private double latitude = 40.442492;//currentLocation.getLatitude();
+    private double longitude = -79.942553;//currentLocation.getLongitude();
 
     // Imma borrow dis real quik
     private String[] filterWords = {"a","about","after","all","also","an","am","and","any","as",
@@ -146,126 +150,130 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
         //}
 
         // Obtain the coordinates of the location
-        double latitude = 40.442492;//currentLocation.getLatitude();
-        double longitude = -79.942553;//currentLocation.getLongitude();
+
 
         // Render a card to tell the user where they are
 
 
-        // Look up the location in Google Places
-        HttpURLConnection url = null;
 
-        try {
-            StringBuilder sb = new StringBuilder(PLACES_API_BASE);
-            // Required params: key, latitude, longitude, radius
-            sb.append("?key=AIzaSyBjIHOsSWfsoPhgTSv7-tCyir3HPx1t-aQ");
-            sb.append("&location=" + latitude + "," + longitude);
-            sb.append("&radius=" + PLACES_RADIUS_DEFAULT);
 
-            URL urlString = new URL(sb.toString());
 
-            // Send the request
-            url = (HttpURLConnection) urlString.openConnection();
+            t = new Thread() {
 
-            // Get the response
-            if (url.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                // Look up the place type
-                BufferedReader reader = new BufferedReader(new InputStreamReader(urlString.openStream()));
-                StringBuffer res = new StringBuffer();
-                String line;
+                public void run() {
+                try {
+                    // Look up the location in Google Places
+                    HttpURLConnection url = null;
 
-                while ((line = reader.readLine()) != null) {
-                    res.append(line);
-                }
+                    StringBuilder sb = new StringBuilder(PLACES_API_BASE);
+                    // Required params: key, latitude, longitude, radius
+                    sb.append("?key=AIzaSyBjIHOsSWfsoPhgTSv7-tCyir3HPx1t-aQ");
+                    sb.append("&location=" + latitude + "," + longitude);
+                    sb.append("&radius=" + PLACES_RADIUS_DEFAULT);
 
-                reader.close();
+                    URL urlString = new URL(sb.toString());
 
-                JSONObject obj = new JSONObject(res.toString());
-                JSONArray results = obj.getJSONArray("results");
-                JSONObject firstResult = results.getJSONObject(0);
-                JSONArray types = firstResult.getJSONArray("types");
+                    // Send the request
+                    url = (HttpURLConnection) urlString.openConnection();
 
-                if (types == null || types.length() == 0) {
-                    // Display a card that says Geolocation has not found anything special
-                    buildErrorCard("Geolocation couldn't find anything special."
-                            + " Try again from the main menu.");
-                    return;
-                }
+                    // Get the response
+                    if (url.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                        // Look up the place type
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(urlString.openStream()));
+                        StringBuffer res = new StringBuffer();
+                        String line;
 
-                HashSet<String> typesAsSet = new HashSet<String>();
-                for (int i = 0; i < types.length(); i++) {
-                    String nextType = types.getString(i);
-                    typesAsSet.add(nextType);
-                }
-
-                String fsClientKey = "5053XWDMYGDL1ECJGBD4R2FIX4XNWJLCFN0WMVDVWTDZANV0";
-                String fsClientSec = "DIALY1OMS1Q3WGBXJ4MWC3X0MTNQE3KOZSYRK23OSMJQ5HDF";
-
-                if (typesAsSet.contains("restaurant")) {
-                    // There is a restaurant nearby! Now we will ask Foursquare for its info
-                    String[] rest_ids = fsApiCall(fsClientKey, fsClientSec, latitude, longitude);
-
-                    // We have obtained the restaurant Ids. Now we must pick a restaurant Id
-                    // and hope it is the correct restaurant, then obtain its menu. We will
-                    // use the menus API in Foursquare to obtain the menu via Id.
-                    // We will also display the provider, as Foursquare requested.
-                    if (rest_ids.length == 0) {
-                        // Display a card that says Geolocation's Foursquare API call failed
-                        buildErrorCard("Glass to Foursquare, do you copy? Nope, guess not. "
-                                + "Aborting mission. Try again from the main menu.");
-                        return;
-                    }
-                    String firstIdHopeForTheBest = rest_ids[0];
-
-                    // Make the menu api call
-                    String[] menuItems = fsMenuApiCall(fsClientKey, fsClientSec, firstIdHopeForTheBest);
-
-                    if (menuItems.length == 0) {
-                        Log.d(TAG, "Could not retrieve menu items");
-                        // Display a card that says Geolocation mode is failing
-                        buildErrorCard("Foursquare says there are no menu items. Exiting."
-                                + " Try again from the main menu.");
-                        return;
-                    }
-
-                    // ***************************************************************************
-                    // ***************************************************************************
-                    // ***************************************************************************
-                    //                        BEGIN LIST RELATED CODE!
-                    //                        The array [finalMenuItems] will hold
-                    //                        up to 10 menu items from the first
-                    //                        restaurant returned by our Google Places search.
-                    //
-                    //                        These menu items are Strings, but can contain
-                    //                        more than one word, e.g. "chocolate mocha latte"
-                    //                        We still need to break down those Strings to
-                    //                        each individual word before translating it.
-                    //
-                    //                        tl;dr [finalMenuItems] is the list!!!!
-
-                    finalMenuItems = menuItems;
-                    if (menuItems.length > 10) {
-                        Log.d(TAG, "Shortening menu items by selecting random items");
-                        finalMenuItems = new String[10];
-                        Random generator = new Random();
-                        for (int i = 0; i < 10; i++) {
-                            int nextRandomIndex = generator.nextInt(menuItems.length);
-                            finalMenuItems[i] = menuItems[nextRandomIndex];
+                        while ((line = reader.readLine()) != null) {
+                            res.append(line);
                         }
-                    }
 
-                    currentcard = 0;
-                    if(finalMenuItems.length > 0)
-                    {
-                        String menuItem = finalMenuItems[currentcard];
-                        String spanishVersion = translateThisWord(menuItem);
-                        //one card
-                        setContentView(R.layout.activity_gps_result);
-                        englishFood = (TextView) findViewById(R.id.textView1);
-                        spanishFood = (TextView) findViewById(R.id.textView2);
-                        englishFood.setText(menuItem);
-                        spanishFood.setText(spanishVersion);
-                    }
+                        reader.close();
+
+                        JSONObject obj = new JSONObject(res.toString());
+                        JSONArray results = obj.getJSONArray("results");
+                        JSONObject firstResult = results.getJSONObject(0);
+                        JSONArray types = firstResult.getJSONArray("types");
+
+                        if (types == null || types.length() == 0) {
+                            // Display a card that says Geolocation has not found anything special
+                            buildErrorCard("Geolocation couldn't find anything special."
+                                    + " Try again from the main menu.");
+                            return;
+                        }
+
+                        HashSet<String> typesAsSet = new HashSet<String>();
+                        for (int i = 0; i < types.length(); i++) {
+                            String nextType = types.getString(i);
+                            typesAsSet.add(nextType);
+                        }
+
+                        String fsClientKey = "5053XWDMYGDL1ECJGBD4R2FIX4XNWJLCFN0WMVDVWTDZANV0";
+                        String fsClientSec = "DIALY1OMS1Q3WGBXJ4MWC3X0MTNQE3KOZSYRK23OSMJQ5HDF";
+
+                        if (typesAsSet.contains("restaurant")) {
+                            // There is a restaurant nearby! Now we will ask Foursquare for its info
+                            String[] rest_ids = fsApiCall(fsClientKey, fsClientSec, latitude, longitude);
+
+                            // We have obtained the restaurant Ids. Now we must pick a restaurant Id
+                            // and hope it is the correct restaurant, then obtain its menu. We will
+                            // use the menus API in Foursquare to obtain the menu via Id.
+                            // We will also display the provider, as Foursquare requested.
+                            if (rest_ids.length == 0) {
+                                // Display a card that says Geolocation's Foursquare API call failed
+                                buildErrorCard("Glass to Foursquare, do you copy? Nope, guess not. "
+                                        + "Aborting mission. Try again from the main menu.");
+                                return;
+                            }
+                            String firstIdHopeForTheBest = rest_ids[0];
+
+                            // Make the menu api call
+                            String[] menuItems = fsMenuApiCall(fsClientKey, fsClientSec, firstIdHopeForTheBest);
+
+                            if (menuItems.length == 0) {
+                                Log.d(TAG, "Could not retrieve menu items");
+                                // Display a card that says Geolocation mode is failing
+                                buildErrorCard("Foursquare says there are no menu items. Exiting."
+                                        + " Try again from the main menu.");
+                                return;
+                            }
+
+                            // ***************************************************************************
+                            // ***************************************************************************
+                            // ***************************************************************************
+                            //                        BEGIN LIST RELATED CODE!
+                            //                        The array [finalMenuItems] will hold
+                            //                        up to 10 menu items from the first
+                            //                        restaurant returned by our Google Places search.
+                            //
+                            //                        These menu items are Strings, but can contain
+                            //                        more than one word, e.g. "chocolate mocha latte"
+                            //                        We still need to break down those Strings to
+                            //                        each individual word before translating it.
+                            //
+                            //                        tl;dr [finalMenuItems] is the list!!!!
+
+                            finalMenuItems = menuItems;
+                            if (menuItems.length > 10) {
+                                Log.d(TAG, "Shortening menu items by selecting random items");
+                                finalMenuItems = new String[10];
+                                Random generator = new Random();
+                                for (int i = 0; i < 10; i++) {
+                                    int nextRandomIndex = generator.nextInt(menuItems.length);
+                                    finalMenuItems[i] = menuItems[nextRandomIndex];
+                                }
+                            }
+
+                            currentcard = 0;
+                            if (finalMenuItems.length > 0) {
+                                String menuItem = finalMenuItems[currentcard];
+                                String spanishVersion = translateThisWord(menuItem);
+                                //one card
+                                setContentView(R.layout.activity_gps_result);
+                                englishFood = (TextView) findViewById(R.id.textView1);
+                                spanishFood = (TextView) findViewById(R.id.textView2);
+                                englishFood.setText(menuItem);
+                                spanishFood.setText(spanishVersion);
+                            }
                     /*
                     for (String menuItem : finalMenuItems) {
                         // Display a card, translate the item, etc. etc.
@@ -278,26 +286,30 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
                         englishFood.setText(menuItem);
                         spanishFood.setText(spanishVersion);
                     }*/
-                    // ****************************************************************************
-                    // ****************************************************************************
-                    // ****************************************************************************
+                            // ****************************************************************************
+                            // ****************************************************************************
+                            // ****************************************************************************
+                        }
+
+                    } else {
+                        // Show an error card that says we can't connect
+                        buildErrorCard("Is there really wi-fi around here?"
+                                + " You know we need wi-fi to get the show on the road, right?"
+                                + " Give up on this mode, do something offline.");
+                        return;
+                    }
+
+                    buildErrorCard("Geo Mode only works for restaurants for now. Come back later, sorry.");
+
+                } catch (Exception e) {
+                    // Display a card that indicates an error
+                    buildErrorCard("Have you ever wanted to read a cryptic exception message? " + e);
+                    Log.d(TAG, "Have you ever wanted to read a cryptic exception message?" + e);
                 }
-
-            } else {
-                // Show an error card that says we can't connect
-                buildErrorCard("Is there really wi-fi around here?"
-                        + " You know we need wi-fi to get the show on the road, right?"
-                        + " Give up on this mode, do something offline.");
-                return;
             }
+        };
 
-            buildErrorCard("Geo Mode only works for restaurants for now. Come back later, sorry.");
-
-        } catch (Exception e) {
-            // Display a card that indicates an error
-            buildErrorCard("Have you ever wanted to read a cryptic exception message? " + e);
-            Log.d(TAG,"Have you ever wanted to read a cryptic exception message?" + e);
-        }
+        t.start();
 
     }
 
