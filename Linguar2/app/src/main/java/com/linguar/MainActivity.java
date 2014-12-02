@@ -42,10 +42,13 @@ public class MainActivity extends Activity {
 
     private GestureDetector mGestureDetector;
 
+    private Card loadedCard;
+
     /** {@link CardScrollView} to use as the main content view. */
     private CardScrollView mCardScroller;
     private Card passiveCard;
     private Card lessonCard;
+    private Card queryCard;
     private Card locationCard;
     private int currentCardIndex;
 
@@ -76,10 +79,19 @@ public class MainActivity extends Activity {
         lessonCard.addImage(R.drawable.menu_mylesson);
         menuCards.add(lessonCard);
 
+        queryCard = new Card(this);
+        queryCard.setImageLayout(Card.ImageLayout.FULL);
+        queryCard.addImage(R.drawable.menu_query);
+        menuCards.add(queryCard);
+
         locationCard = new Card(this);
         locationCard.setImageLayout(Card.ImageLayout.FULL);
-        locationCard.addImage(R.drawable.menu_query);
+        locationCard.addImage(R.drawable.menu_gps);
         menuCards.add(locationCard);
+
+        loadedCard = new Card(this);
+        loadedCard.setImageLayout(Card.ImageLayout.FULL);
+        loadedCard.addImage(R.drawable.launching_page_b);
 
         currentCardIndex = 0;
 
@@ -107,22 +119,14 @@ public class MainActivity extends Activity {
             @Override
             public int getPosition(Object item) { return 0; }
         });
-        /*
-        // Handle the TAP event.
-        mCardScroller.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // Plays disallowed sound to indicate that TAP actions are not supported.
 
-                AudioManager am = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-                am.playSoundEffect(Sounds.DISALLOWED);
-
-            }
-        });
-        */
 
         setContentView(mView);
 
+        dictionaryLoader();
+    }
+
+    private void dictionaryLoader(){
         // load dictionaries
         Dictionary dic = Dictionary.getInstance();
         CategoryDictionary cat = CategoryDictionary.getInstance();
@@ -184,6 +188,8 @@ public class MainActivity extends Activity {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+
+        setContentView(loadedCard.getView());
     }
 
     private GestureDetector createGestureDetector(Context context) {
@@ -206,6 +212,14 @@ public class MainActivity extends Activity {
                         Intent learning = new Intent(c, LessonActivity.class);
                         startActivity(learning);
                     }
+                    else if(currentCardIndex == 2){
+                        Intent learning = new Intent(c, QueryActivity.class);
+                        startActivity(learning);
+                    }
+                    else if(currentCardIndex == 3){
+                        Intent learning = new Intent(c, GPSActivity.class);
+                        startActivity(learning);
+                    }
                     return true;
                 } else if (gesture == Gesture.TWO_TAP) {
                     // do something on two finger tap
@@ -213,7 +227,7 @@ public class MainActivity extends Activity {
                 } else if (gesture == Gesture.SWIPE_RIGHT) {
                     // do something on right (forward) swipe
                     am.playSoundEffect(Sounds.SELECTED);
-                    if(currentCardIndex < 2) {
+                    if(currentCardIndex < 3) {
                         currentCardIndex++;
                         setContentView(menuCards.get(currentCardIndex).getView());
                     }
@@ -286,7 +300,7 @@ public class MainActivity extends Activity {
         View card = new CardBuilder(this, CardBuilder.Layout.TITLE)
                 //.setText("")
                 //.setIcon(R.drawable.launching_page_B)
-                .addImage(R.drawable.launching_page_b)
+                .addImage(R.drawable.loading_dict)
                 .getView();
 
         return card;

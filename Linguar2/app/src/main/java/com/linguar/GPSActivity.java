@@ -9,8 +9,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.location.LocationManager;
+import android.view.MotionEvent;
 import android.widget.TextView;
 
+import com.google.android.glass.touchpad.Gesture;
 import com.google.android.glass.touchpad.GestureDetector;
 import com.linguar.dictionary.Dictionary;
 import com.linguar.dictionary.Word;
@@ -45,14 +47,16 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
 
     private static final String TAG = "GEOLOCATION";
 
-    private TextToSpeech menuTTS;
-    private Locale spa;
     private TextView englishFood;
     private TextView spanishFood;
-    private TextView mLocation;
+
+    private TextToSpeech menuTTS;
+    private Locale spa;
     private Dictionary dic;
 
     private GestureDetector mGestureDetector;
+    private  String[] finalMenuItems;
+    private Integer currentcard;
 
     // Imma borrow dis real quik
     private String[] filterWords = {"a","about","after","all","also","an","am","and","any","as",
@@ -70,6 +74,9 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gps);
+
+        mGestureDetector = createGestureDetector(this);
+
         menuTTS = new TextToSpeech(this, this);
         dic = Dictionary.getInstance();
         // Write code here that will either
@@ -136,9 +143,7 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
         double longitude = currentLocation.getLongitude();
 
         // Render a card to tell the user where they are
-        setContentView(R.layout.activity_gps_result);
-        mLocation = (TextView) findViewById(R.id.coordinatesView);
-        mLocation.setText("(" + latitude + "," + longitude + ")");
+
 
         // Look up the location in Google Places
         HttpURLConnection url = null;
@@ -230,7 +235,8 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
                     //                        each individual word before translating it.
                     //
                     //                        tl;dr [finalMenuItems] is the list!!!!
-                    String[] finalMenuItems = menuItems;
+
+                    finalMenuItems = menuItems;
                     if (menuItems.length > 10) {
                         Log.d(TAG, "Shortening menu items by selecting random items");
                         finalMenuItems = new String[10];
@@ -241,22 +247,30 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
                         }
                     }
 
-                    for (String menuItem : finalMenuItems) {
-                        // Display a card, translate the item, etc. etc.
-                        // Translate the item, but first split it into its different words
-                        String[] words = menuItem.split(" ");
-                        String finalTranslation = "";
-                        for (String word : words) {
-                            word = word.trim();
-                            finalTranslation += translateThisWord(word) + " ";
-                        }
+                    currentcard = 0;
+                    if(finalMenuItems.length > 0)
+                    {
+                        String menuItem = finalMenuItems[currentcard];
+                        String spanishVersion = translateThisWord(menuItem);
+                        //one card
                         setContentView(R.layout.activity_gps_result);
                         englishFood = (TextView) findViewById(R.id.textView1);
                         spanishFood = (TextView) findViewById(R.id.textView2);
                         englishFood.setText(menuItem);
-                        spanishFood.setText(finalTranslation);
-                        Thread.sleep(800);
+                        spanishFood.setText(spanishVersion);
                     }
+                    /*
+                    for (String menuItem : finalMenuItems) {
+                        // Display a card, translate the item, etc. etc.
+                        // Translate the item
+                        String spanishVersion = translateThisWord(menuItem);
+                        //one card
+                        setContentView(R.layout.activity_gps_result);
+                        englishFood = (TextView) findViewById(R.id.textView1);
+                        spanishFood = (TextView) findViewById(R.id.textView2);
+                        englishFood.setText(menuItem);
+                        spanishFood.setText(spanishVersion);
+                    }*/
                     // ****************************************************************************
                     // ****************************************************************************
                     // ****************************************************************************
@@ -471,4 +485,94 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
             spa = new Locale("es", "ES");
         menuTTS.setLanguage(spa);
     }
+
+    private GestureDetector createGestureDetector(Context context) {
+        //finalize context i guess??
+        final Context c = context;
+
+        GestureDetector gestureDetector = new GestureDetector(context);
+        //Create a base listener for generic gestures
+        gestureDetector.setBaseListener( new GestureDetector.BaseListener() {
+            @Override
+            public boolean onGesture(Gesture gesture) {
+                if (gesture == Gesture.TAP) {
+                    // do something on tap
+                   // menuTTS.speak((spanishFood.getText()).toString(), TextToSpeech.QUEUE_FLUSH, null);
+                    return true;
+                } else if (gesture == Gesture.TWO_TAP) {
+                    // do something on two finger tap
+                    return true;
+                } else if (gesture == Gesture.SWIPE_RIGHT) {
+                    // do something on right (forward) swipe
+
+                    if(finalMenuItems != null) {
+                        currentcard = (currentcard + 1) % finalMenuItems.length;
+                        if (finalMenuItems.length > 0) {
+                            String menuItem = finalMenuItems[currentcard];
+                            String spanishVersion = translateThisWord(menuItem);
+                            //one card
+                            setContentView(R.layout.activity_gps_result);
+                            englishFood = (TextView) findViewById(R.id.textView1);
+                            spanishFood = (TextView) findViewById(R.id.textView2);
+                            englishFood.setText(menuItem);
+                            spanishFood.setText(spanishVersion);
+                        }
+                    }
+                    return true;
+                } else if (gesture == Gesture.SWIPE_LEFT) {
+                    // do something on left (backwards) swipe
+                    if(finalMenuItems != null) {
+                        currentcard = (currentcard - 1) % finalMenuItems.length;
+                        if (finalMenuItems.length > 0) {
+                            String menuItem = finalMenuItems[currentcard];
+                            String spanishVersion = translateThisWord(menuItem);
+                            //one card
+                            setContentView(R.layout.activity_gps_result);
+                            englishFood = (TextView) findViewById(R.id.textView1);
+                            spanishFood = (TextView) findViewById(R.id.textView2);
+                            englishFood.setText(menuItem);
+                            spanishFood.setText(spanishVersion);
+                        }
+                    }
+                    return true;
+                }
+                return false;
+            }
+        });
+        gestureDetector.setFingerListener(new GestureDetector.FingerListener() {
+            @Override
+            public void onFingerCountChanged(int previousCount, int currentCount) {
+                // do something on finger count changes
+            }
+        });
+        gestureDetector.setScrollListener(new GestureDetector.ScrollListener() {
+            @Override
+            public boolean onScroll(float displacement, float delta, float velocity) {
+                // do something on scrolling
+                return false;
+            }
+        });
+        return gestureDetector;
+    }
+    /* Send generic motion events to the gesture detector
+    */
+    @Override
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        if (mGestureDetector != null) {
+            return mGestureDetector.onMotionEvent(event);
+        }
+        return false;
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        menuTTS.stop();
+        menuTTS.shutdown();
+
+        super.onDestroy();
+
+        finish();
+    }
+
 }

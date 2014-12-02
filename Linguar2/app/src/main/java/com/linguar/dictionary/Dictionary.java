@@ -48,6 +48,9 @@ public class Dictionary implements Serializable {
 
         while ((read=br.readLine())!=null){
 			 String[] wordList = (read.split(","));
+            if(wordList[0].equals("uncle") || wordList[0].equals("cousin"))
+                Log.d("DIC",wordList[0]);
+
 			 dictionary.put(wordList[0], new Word(wordList[0],wordList[1]) );
 		}
 		 br.close();
@@ -75,11 +78,10 @@ public class Dictionary implements Serializable {
 		{
             // if we are thinking on displaying it, it must have at least 2 categories
 			if(isDisplayed) {
-                if(dictionary.get(w).incrementCategoryCount())
-                    return dictionary.get(w);
+                dictionary.get(w).incrementCategoryCount();
 			}
-			else
-                return dictionary.get(w);
+
+            return dictionary.get(w);
 		}
 		
 		return null;

@@ -39,7 +39,7 @@ public class WordGetter{
         todaysDate = Long.valueOf(sdf.format(Calendar.getInstance().getTime()));
 		List<String> allCategoryWords =  new ArrayList<String>();
 		
-		if(categoryList.size() < 5)
+		if(categoryList.size() < 2)
 		{
 			throw new Exception("Insufficient number of top categories : The number of categories supplied are : "+ categoryList.size());
 		}
@@ -64,11 +64,11 @@ public class WordGetter{
         HashMap<String, Word> wordDictionary = _dictionary.getDictionary();
 
         System.out.println("size " + _dictionary.getDictionary().size());
-
+        Collections.shuffle(allCategoryWords);
         for(String word : allCategoryWords) {
 
                 if (_dictionary.getWord(word,false)== null){
-                    Log.d("WG", "paila");
+
                     continue;
                 }
 
