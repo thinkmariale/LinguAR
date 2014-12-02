@@ -159,7 +159,7 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
 
         try {
             // Look up the location in Google Places
-            HttpURLConnection url = null;
+          /*  HttpURLConnection url = null;
 
             StringBuilder sb = new StringBuilder(PLACES_API_BASE);
             // Required params: key, latitude, longitude, radius
@@ -173,7 +173,7 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
             url = (HttpURLConnection) urlString.openConnection();
 
             // Get the response
-            if (url.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            if (url.getResponseCode() == HttpURLConnection.HTTP_OK) {*/
 //                // Look up the place type
 //                BufferedReader reader = new BufferedReader(new InputStreamReader(urlString.openStream()));
 //                StringBuffer res = new StringBuffer();
@@ -289,14 +289,14 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
                     // ****************************************************************************
                     // ****************************************************************************
                 }
-
+            /*
             } else {
                 // Show an error card that says we can't connect
                 buildErrorCard("Is there really wi-fi around here?"
                         + " You know we need wi-fi to get the show on the road, right?"
                         + " Give up on this mode, do something offline.");
                 return;
-            }
+            }*/
 
             buildErrorCard("Geo Mode only works for restaurants for now. Come back later, sorry.");
 
@@ -326,7 +326,7 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
             sb.append("?key=AIzaSyBjIHOsSWfsoPhgTSv7-tCyir3HPx1t-aQ");
             sb.append("&location=" + latitude + "," + longitude);
             sb.append("&radius=" + PLACES_RADIUS_DEFAULT);
-
+            Log.d(TAG,sb.toString());
             try {
                 URL urlString = new URL(sb.toString());
 
@@ -387,6 +387,7 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
             Log.d(TAG, "Response was not HTTP OK");
             exResult = new HashSet<String>();
             return new HashSet<String>();
+
         }
     }
 
