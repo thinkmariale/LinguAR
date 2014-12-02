@@ -5,6 +5,7 @@ import android.content.Context;
 import android.location.Criteria;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.Menu;
@@ -59,6 +60,7 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
     private  String[] finalMenuItems;
     private Integer currentcard;
 
+
     // Imma borrow dis real quik
     private String[] filterWords = {"a","about","after","all","also","an","am","and","any","as",
             "at","back","be","because","but","by","can","come","could",
@@ -109,43 +111,43 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
         // to a backend database if it gets too slow.
 
         // Obtain location services
-        Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        criteria.setAltitudeRequired(true);
+        //Criteria criteria = new Criteria();
+        //criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        //criteria.setAltitudeRequired(true);
 
-        Object systemService = this.getSystemService(Context.LOCATION_SERVICE);
-        if (!(systemService instanceof LocationManager)) {
+        //Object systemService = this.getSystemService(Context.LOCATION_SERVICE);
+        //if (!(systemService instanceof LocationManager)) {
             // Display a card that indicates error
-            buildErrorCard("Fail fast, fail hard. Couldn't find the Location Service."
-                    + " Try again from the main menu.");
-            return;
-        }
-        LocationManager locationManager = (LocationManager)systemService;
+        //    buildErrorCard("Fail fast, fail hard. Couldn't find the Location Service."
+        //            + " Try again from the main menu.");
+        //    return;
+        //}
+        //LocationManager locationManager = (LocationManager)systemService;
 
-        List<String> providers = locationManager.getProviders(criteria, true);
-        if (providers.isEmpty()) {
+        //List<String> providers = locationManager.getProviders(criteria, true);
+        //if (providers.isEmpty()) {
             // Display a card that indicates error
-            buildErrorCard("If at first you don't succeed..."
-                    + " Ok, we couldn't find loc providers."
-                    + " Try again from the main menu.");
-            return;
-        }
+        //    buildErrorCard("If at first you don't succeed..."
+         //           + " Ok, we couldn't find loc providers."
+         //           + " Try again from the main menu.");
+         //   return;
+        //}
 
-        Location currentLocation = null;
+        //Location currentLocation = null;
         // We have the location service providers, now let's try them all.
-        for (String provider: providers) {
-            currentLocation = locationManager.getLastKnownLocation(provider);
-        }
-        if (currentLocation == null) {
+        //for (String provider: providers) {
+        //    currentLocation = locationManager.getLastKnownLocation(provider);
+        //}
+        //if (currentLocation == null) {
             // Display a card that indicates an error
-            buildErrorCard("Where are you? Where am I? Couldn't find location."
-                    + " Try again from the main menu.");
-            return;
-        }
+        //    buildErrorCard("Where are you? Where am I? Couldn't find location."
+        //            + " Try again from the main menu.");
+        //    return;
+        //}
 
         // Obtain the coordinates of the location
-        double latitude = currentLocation.getLatitude();
-        double longitude = currentLocation.getLongitude();
+        double latitude = 40.442492;//currentLocation.getLatitude();
+        double longitude = -79.942553;//currentLocation.getLongitude();
 
         // Render a card to tell the user where they are
 
@@ -294,6 +296,7 @@ public class GPSActivity extends Activity implements TextToSpeech.OnInitListener
         } catch (Exception e) {
             // Display a card that indicates an error
             buildErrorCard("Have you ever wanted to read a cryptic exception message? " + e);
+            Log.d(TAG,"Have you ever wanted to read a cryptic exception message?" + e);
         }
 
     }
