@@ -1,14 +1,19 @@
-<<<<<<< HEAD
 package com.linguar;
 
 import android.app.Activity;
 import android.content.Context;
 import android.location.Location;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.location.LocationManager;
+import android.widget.TextView;
+
+import com.google.android.glass.touchpad.GestureDetector;
+import com.linguar.dictionary.Dictionary;
+import com.linguar.dictionary.Word;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -17,12 +22,16 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Random;
+
 import org.json.*;
 
 
-public class GPSActivity extends Activity {
+public class GPSActivity extends Activity implements TextToSpeech.OnInitListener {
 
     // These URLs are used to make API calls
     private static final String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place";
@@ -36,11 +45,33 @@ public class GPSActivity extends Activity {
 
     private static final String TAG = "GEOLOCATION";
 
+    private TextToSpeech menuTTS;
+    private Locale spa;
+    private TextView englishFood;
+    private TextView spanishFood;
+    private TextView mLocation;
+    private Dictionary dic;
+
+    private GestureDetector mGestureDetector;
+
+    // Imma borrow dis real quik
+    private String[] filterWords = {"a","about","after","all","also","an","am","and","any","as",
+            "at","back","be","because","but","by","can","come","could",
+            "day","do","even","first","for","from","get","give","go","good",
+            "have","he","her","him","his","how","I","if","in","into","it","its",
+            "just","know","like","look","make","me","most","my","new","no","not",
+            "now","of","on","one","only","or","other","our","out","over","people",
+            "say","see","she","so","some","take","than","that","the","their","them",
+            "then","there","these","they","think","this","time","to","two","up","us",
+            "use","want","way","we","well","what","when","which","who","will","with",
+            "work","would","year","you","your"};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gps);
-
+        menuTTS = new TextToSpeech(this, this);
+        dic = Dictionary.getInstance();
         // Write code here that will either
         // 1. Send a request to a backend server for location
         //    based data processing
@@ -73,6 +104,8 @@ public class GPSActivity extends Activity {
         Object systemService = this.getSystemService(Context.LOCATION_SERVICE);
         if (!(systemService instanceof LocationManager)) {
             // Display a card that indicates error
+            buildErrorCard("Fail fast, fail hard. Couldn't find the Location Service."
+                    + " Try again from the main menu.");
             return;
         }
         LocationManager locationManager = (LocationManager)systemService;
@@ -80,6 +113,9 @@ public class GPSActivity extends Activity {
         List<String> providers = locationManager.getProviders(true);
         if (providers.isEmpty()) {
             // Display a card that indicates error
+            buildErrorCard("If at first you don't succeed..."
+                    + " Ok, we couldn't find loc providers."
+                    + " Try again from the main menu.");
             return;
         }
 
@@ -90,6 +126,8 @@ public class GPSActivity extends Activity {
         }
         if (currentLocation == null) {
             // Display a card that indicates an error
+            buildErrorCard("Where are you? Where am I? Couldn't find location."
+                    + " Try again from the main menu.");
             return;
         }
 
@@ -97,9 +135,13 @@ public class GPSActivity extends Activity {
         double latitude = currentLocation.getLatitude();
         double longitude = currentLocation.getLongitude();
 
+        // Render a card to tell the user where they are
+        setContentView(R.layout.activity_gps_result);
+        mLocation = (TextView) findViewById(R.id.coordinatesView);
+        mLocation.setText("(" + latitude + "," + longitude + ")");
+
         // Look up the location in Google Places
         HttpURLConnection url = null;
-        StringBuilder jsonResults = new StringBuilder();
 
         try {
             StringBuilder sb = new StringBuilder(PLACES_API_BASE);
@@ -133,7 +175,9 @@ public class GPSActivity extends Activity {
 
                 if (types == null || types.length() == 0) {
                     // Display a card that says Geolocation has not found anything special
-
+                    buildErrorCard("Geolocation couldn't find anything special."
+                            + " Try again from the main menu.");
+                    return;
                 }
 
                 HashSet<String> typesAsSet = new HashSet<String>();
@@ -155,6 +199,9 @@ public class GPSActivity extends Activity {
                     // We will also display the provider, as Foursquare requested.
                     if (rest_ids.length == 0) {
                         // Display a card that says Geolocation's Foursquare API call failed
+                        buildErrorCard("Glass to Foursquare, do you copy? Nope, guess not. "
+                                + "Aborting mission. Try again from the main menu.");
+                        return;
                     }
                     String firstIdHopeForTheBest = rest_ids[0];
 
@@ -163,31 +210,71 @@ public class GPSActivity extends Activity {
 
                     if (menuItems.length == 0) {
                         Log.d(TAG, "Could not retrieve menu items");
-                        // Display a card that says Geolocation mode is phailing
-
+                        // Display a card that says Geolocation mode is failing
+                        buildErrorCard("Foursquare says there are no menu items. Exiting."
+                                + " Try again from the main menu.");
+                        return;
                     }
 
-                    for (String menuItem : menuItems) {
+                    // ***************************************************************************
+                    // ***************************************************************************
+                    // ***************************************************************************
+                    //                        BEGIN LIST RELATED CODE!
+                    //                        The array [finalMenuItems] will hold
+                    //                        up to 10 menu items from the first
+                    //                        restaurant returned by our Google Places search.
+                    //
+                    //                        These menu items are Strings, but can contain
+                    //                        more than one word, e.g. "chocolate mocha latte"
+                    //                        We still need to break down those Strings to
+                    //                        each individual word before translating it.
+                    //
+                    //                        tl;dr [finalMenuItems] is the list!!!!
+                    String[] finalMenuItems = menuItems;
+                    if (menuItems.length > 10) {
+                        Log.d(TAG, "Shortening menu items by selecting random items");
+                        finalMenuItems = new String[10];
+                        Random generator = new Random();
+                        for (int i = 0; i < 10; i++) {
+                            int nextRandomIndex = generator.nextInt(menuItems.length);
+                            finalMenuItems[i] = menuItems[nextRandomIndex];
+                        }
+                    }
+
+                    for (String menuItem : finalMenuItems) {
                         // Display a card, translate the item, etc. etc.
-                        // ************************************************************************
-                        // ************************************************************************
-                        // ************************************************************************
-                        // TODO TODO TODO
-                        // PUT YOUR CODE HERE!!!!!!!!!!!!!!!!!!!!!! You have access to each
-                        // menuItem String in [menuItems]
-                        // ************************************************************************
-                        // ************************************************************************
-                        // ************************************************************************
+                        // Translate the item, but first split it into its different words
+                        String[] words = menuItem.split(" ");
+                        String finalTranslation = "";
+                        for (String word : words) {
+                            word = word.trim();
+                            finalTranslation += translateThisWord(word) + " ";
+                        }
+                        setContentView(R.layout.activity_gps_result);
+                        englishFood = (TextView) findViewById(R.id.textView1);
+                        spanishFood = (TextView) findViewById(R.id.textView2);
+                        englishFood.setText(menuItem);
+                        spanishFood.setText(finalTranslation);
+                        Thread.sleep(800);
                     }
+                    // ****************************************************************************
+                    // ****************************************************************************
+                    // ****************************************************************************
                 }
 
             } else {
                 // Show an error card that says we can't connect
+                buildErrorCard("Is there really wi-fi around here?"
+                        + " You know we need wi-fi to get the show on the road, right?"
+                        + " Give up on this mode, do something offline.");
+                return;
             }
 
+            buildErrorCard("Geo Mode only works for restaurants for now. Come back later, sorry.");
 
         } catch (Exception e) {
             // Display a card that indicates an error
+            buildErrorCard("Have you ever wanted to read a cryptic exception message? " + e);
         }
 
     }
@@ -328,6 +415,33 @@ public class GPSActivity extends Activity {
         }
     }
 
+    private String translateThisWord(String word) {
+        // All the translated words will necessarily be displayed
+        // So we set the second param of getWords (boolean isDisplayed)
+        // to true.
+        Word foundWord = dic.getWord(word, true);
+        if (foundWord == null) {
+            return "";
+        }
+
+        if (isFilterWord(foundWord.englishWord)) {
+            return "";
+        }
+
+        return foundWord.spanishTranslation;
+    }
+
+    private boolean isFilterWord(String word) {
+        return Arrays.binarySearch(filterWords, word) >= 0;
+    }
+
+    private void buildErrorCard(String errorMessage) {
+        TextView messageText;
+        setContentView(R.layout.message_layout);
+        messageText = (TextView) findViewById(R.id.messageView);
+        messageText.setText(errorMessage);
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -348,5 +462,13 @@ public class GPSActivity extends Activity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+
+    public void onInit(int initStatus) {
+        //if successful, set locale
+        if (initStatus == TextToSpeech.SUCCESS)
+            spa = new Locale("es", "ES");
+        menuTTS.setLanguage(spa);
     }
 }
